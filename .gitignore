@@ -1,6 +1,8 @@
-/demo/my_token.py
+/demo/tokens.py
 /demo/keep_alive.py
 /demo/test.py
 /demo/main.py
 /demo/role_settings.py
 /demo/birthdays.json
+/demo/chess.py
+/demo/proffesional_chess.py

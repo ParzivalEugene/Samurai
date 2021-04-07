@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands, tasks
-from my_token import token
+from tokens import *
 import requests
 import json
 import re
@@ -27,6 +27,17 @@ tic_tac_toe_info = {
         [2, 5, 8],
         [0, 4, 8],
         [2, 4, 6]
+    ]
+}
+
+phrases = {
+    "insults": [
+        "ботяра пидор", "бот говно", "говно бот", "долбаеб бот", "бот долбаеб", "бот пидор"
+    ],
+    "compliments": ["бот " + i for i in "ахуенный, классный, крутой, заебатый, милый, пиздатый".split(", ")] + \
+                   [i + " бот" for i in "ахуенный, классный, крутой, заебатый, милый, пиздатый".split(", ")],
+    "sad": [
+        "грустно", "одиноко", "печально", "горько", "тоскливо", "хуево", "умираю"
     ]
 }
 
@@ -100,10 +111,7 @@ async def on_ready():
 @bot.event
 async def on_message(message):
     """Reacting on messages and send request by phrase"""
-    insults = [
-        "ботяра пидор", "бот говно", "говно бот", "долбаеб бот", "бот долбаеб"
-    ]
-
+    global phrases
     msg = message.content.lower()
     if message.author == bot.user:
         return
@@ -112,22 +120,27 @@ async def on_message(message):
 
     if msg.startswith("кот"):
         await message.channel.send(embed=embed_cat(message.author))
-    if any(msg.startswith(i) for i in ("пес", "соба")):
+    elif any(msg.startswith(i) for i in ("пес", "соба")):
         await message.channel.send(embed=embed_dog(message.author))
-    if msg.startswith("вдохновение"):
+    elif msg.startswith("вдохновение"):
         await message.channel.send(get_quote())
 
     """Reacting on basic phrases -----------------------------------------------------------------"""
 
     if msg.startswith("привет"):
         await message.channel.send("Приветствую вас!")
-    if msg.startswith("нахуй юлю"):
+    elif msg.startswith("нахуй юлю"):
         await message.channel.send("туда ее")
         await message.channel.send(get_emoji("julia"))
-    if any(phrase in msg for phrase in insults):
+    elif any(phrase in msg for phrase in phrases["insults"]):
         await message.channel.send("мать твоя блять, сын собаки")
         await message.channel.send(get_emoji('kavo'))
-    if msg.startswith("арина сука"):
+    elif any(phrase in msg for phrase in phrases["compliments"]):
+        await message.channel.send("люблю тебя зайка " + str(get_emoji("wowcry")))
+    elif any(phrase in msg for phrase in phrases["sad"]):
+        await message.channel.send("не грусти зайка, вот тебе котик")
+        await message.channel.send(embed=embed_cat(message.author))
+    elif msg.startswith("арина сука"):
         await message.channel.send("согласен")
         await message.channel.send(get_emoji("ahuet"))
     await bot.process_commands(message)
@@ -145,7 +158,8 @@ async def my_help(ctx):
     embed.add_field(name="Команды",
                     value=f"""**{prefix}help** - вывод информации о боте.
 **{prefix}xo_rules** - вывод информации о крестиках-ноликах.
-**{prefix}bd_rules** - вывод информации о днях рождения. 
+**{prefix}bd_rules** - вывод информации о днях рождения.
+**{prefix}forecast <place>** - вывод прогноза погоды в указанном месте
 __Все команды вводятся **латинскими буквами**__""",
                     inline=False)
     await ctx.send(embed=embed)
@@ -380,5 +394,53 @@ async def add_birthday_date_error(ctx, error):
         await ctx.send("Вы указали неверную дату")
 
 
+@bot.command(name="toss")
+async def heads_or_tails(ctx):
+    answers = [":bird: Орел :bird:", ":coin: Решка :coin:"]
+    await ctx.send(random.choice(answers))
+
+
+@bot.command(name="forecast")
+async def get_forecast(ctx, *place: str):
+    place = " ".join(place)
+    response = requests.get("http://api.openweathermap.org/data/2.5/find",
+                            params={
+                                "q": place,
+                                "lang": "ru",
+                                "units": "metric",
+                                "APPID": app_id_for_forecast
+                            }).json()
+    if response["cod"] != "200":
+        await ctx.send("Не удалось найти информацию")
+        return
+    response = response["list"][0]
+    embed = discord.Embed(
+        title=f"Погода в {place}",
+        description=f"В {place} сейчас {response['main']['temp']}°С, {response['weather'][0]['description']}",
+        colour=discord.Colour.purple()
+    )
+    embed.set_thumbnail(url=f"http://openweathermap.org/img/wn/{response['weather'][0]['icon']}.png")
+    await ctx.send(embed=embed)
+
+
+@get_forecast.error
+async def get_forecast_error(ctx, error):
+    if isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send("Вы не указали место")
+    if isinstance(error, commands.BadArgument):
+        await ctx.send("Вы неверно указали место")
+
+
+@bot.command(name="8ball")
+async def magic_ball(ctx, *message):
+    message = " ".join(message)
+    embed = discord.Embed(
+        title=":crystal_ball: говорит: " + random.choice("да, нет, возможно, я не знаю, скорее всего да, скорее всего нет, определенно нет, определенно да, 50/50, лучше вам не знать".split(", ")),
+        colour=discord.Colour.purple()
+    )
+    embed.set_footer(text=f"Вопрос: {message}")
+    await ctx.send(embed=embed)
+
+
 keep_alive()
-bot.run(token)
+bot.run(token_for_bot)
