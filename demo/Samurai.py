@@ -30,6 +30,24 @@ tic_tac_toe_info = {
     ]
 }
 
+connect_four_info = {
+    "player1": "",
+    "player2": "",
+    "turn": "",
+    "gameOver": True,
+    "board": [],
+    "count": 0,
+    "icons": {
+        "cell": ":white_large_square:",
+        "ball_1": ":blue_square:",
+        "ball_2": ":yellow_square:"
+    },
+    "board_size": {
+        "height": 6,
+        "length": 7
+    }
+}
+
 phrases = {
     "insults": [
         "ботяра пидор", "бот говно", "говно бот", "долбаеб бот", "бот долбаеб", "бот пидор"
@@ -159,7 +177,10 @@ async def my_help(ctx):
                     value=f"""**{prefix}help** - вывод информации о боте.
 **{prefix}xo_rules** - вывод информации о крестиках-ноликах.
 **{prefix}bd_rules** - вывод информации о днях рождения.
-**{prefix}forecast <place>** - вывод прогноза погоды в указанном месте
+**{prefix}c4_rules** - вывод информации о 4 в ряд.
+**{prefix}forecast <place>** - вывод прогноза погоды в указанном месте.
+**{prefix}8ball <message>** - магический ответит на вопрос.
+**{prefix}toss** - орел или решка.
 __Все команды вводятся **латинскими буквами**__""",
                     inline=False)
     await ctx.send(embed=embed)
@@ -168,13 +189,13 @@ __Все команды вводятся **латинскими буквами**
 @bot.command(name="xo_rules")
 async def tic_tac_toe_rules(ctx):
     embed = discord.Embed(
-        title=f"Информация о крестиках-ноликах",
+        title="Информация о **крестиках-ноликах**",
         description=":negative_squared_cross_mark: :o2:",
         colour=discord.Colour.purple()
     )
     embed.add_field(name="Команды",
                     value=f"""**{prefix}xo <member1> <member2>** - начало игры игры в крестики-нолики с указанием игроков.
-**{prefix}place <number>** - команда для установки Х или О в нужное место (числа от 1 до 9)
+**{prefix}xo_place <number>** - команда для установки Х или О в нужное место (число от 1 до 9)
 поле представляет из себя 
 :one: :two: :three:
 :four: :five: :six:
@@ -188,7 +209,7 @@ __Все команды вводятся **латинскими буквами**
 async def tic_tac_toe(ctx, p1: discord.Member, p2: discord.Member):
     global tic_tac_toe_info
     if tic_tac_toe_info["gameOver"]:
-        if p1.id == bot.user or p2 == bot.user:
+        if p1 == bot.user or p2 == bot.user:
             await ctx.send("К сожалению я не могу с вами играть")
             return
         tic_tac_toe_info["board"] = [":white_large_square:", ":white_large_square:", ":white_large_square:",
@@ -221,8 +242,8 @@ async def tic_tac_toe(ctx, p1: discord.Member, p2: discord.Member):
         await ctx.send("Игра в прогрессе. Завершите текущую, затем начните новую.")
 
 
-@bot.command()
-async def place(ctx, pos: int):
+@bot.command(name="xo_place")
+async def tic_tac_toe_place(ctx, pos: int):
     global tic_tac_toe_info
     if not tic_tac_toe_info["gameOver"]:
         mark = ""
@@ -246,12 +267,20 @@ async def place(ctx, pos: int):
                         else:
                             line += " " + tic_tac_toe_info["board"][x]
 
-                    check_winner(mark)
+                    tic_tac_toe_check_winner(mark)
                     if tic_tac_toe_info["gameOver"]:
-                        await ctx.send(mark + " победил")
+                        embed = discord.Embed(
+                            title=f"Победа {mark} :exclamation:",
+                            colour=discord.Colour.purple()
+                        )
+                        await ctx.send(embed=embed)
                     elif tic_tac_toe_info["count"] >= 9:
                         tic_tac_toe_info["gameOver"] = True
-                        await ctx.send("Ничья!")
+                        embed = discord.Embed(
+                            title="Ничья :exclamation:",
+                            colour=discord.Colour.purple()
+                        )
+                        await ctx.send(embed=embed)
 
                     # switch turns
                     if tic_tac_toe_info["turn"] == tic_tac_toe_info["player1"]:
@@ -265,10 +294,10 @@ async def place(ctx, pos: int):
         else:
             await ctx.send("Сейчас не ваш ход")
     else:
-        await ctx.send("Начните новую игру используя команду !крестики-нолики")
+        await ctx.send(f"Начните новую игру используя команду {prefix}xo")
 
 
-def check_winner(mark):
+def tic_tac_toe_check_winner(mark):
     global tic_tac_toe_info
     for condition in tic_tac_toe_info["winning_conditions"]:
         if tic_tac_toe_info["board"][condition[0]] == mark and \
@@ -279,15 +308,14 @@ def check_winner(mark):
 
 @tic_tac_toe.error
 async def tic_tac_toe_error(ctx, error):
-    print(error)
     if isinstance(error, commands.MissingRequiredArgument):
         await ctx.send("Необходимо два игрока")
     elif isinstance(error, commands.BadArgument):
-        await ctx.send("Убедитесь что вы пинганули участника.")
+        await ctx.send("Убедитесь что вы указали участника.")
 
 
-@place.error
-async def place_error(ctx, error):
+@tic_tac_toe_place.error
+async def tic_tac_toe_place(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
         await ctx.send("Вы не указали позицию")
     elif isinstance(error, commands.BadArgument):
@@ -439,6 +467,141 @@ async def magic_ball(ctx, *message):
         colour=discord.Colour.purple()
     )
     embed.set_footer(text=f"Вопрос: {message}")
+    await ctx.send(embed=embed)
+
+
+@bot.command(name="c4")
+async def connect_four(ctx, p1: discord.Member, p2: discord.Member):
+    global connect_four_info
+    if connect_four_info["gameOver"]:
+        if p1 == bot.user or p2 == bot.user:
+            await ctx.send("К сожалению я не могу с вами играть")
+            return
+        connect_four_info["board"] = [[connect_four_info["icons"]["cell"]
+                                       for i in range(connect_four_info["board_size"]["length"])]
+                                      for i in range(connect_four_info["board_size"]["height"])]
+        connect_four_info["info"] = ""
+        connect_four_info["gameOver"] = False
+        connect_four_info["count"] = 0
+        connect_four_info["player1"] = p1
+        connect_four_info["player2"] = p2
+
+        for line in connect_four_info["board"]:
+            await ctx.send(" ".join(line))
+
+        num = random.choice((1, 2))
+        if num == 1:
+            connect_four_info["turn"] = connect_four_info["player1"]
+            await ctx.send("Сейчас ходит <@" + str(connect_four_info.get("player1").id) + ">")
+        elif num == 2:
+            connect_four_info["turn"] = connect_four_info["player2"]
+            await ctx.send("Сейчас ходит <@" + str(connect_four_info.get("player2").id) + ">")
+    else:
+        await ctx.send("Игра в прогрессе. Завершите текущую, затем начните новую.")
+
+
+@bot.command(name="c4_place")
+async def connect_four_place(ctx, pos: int):
+    global connect_four_info
+    if not connect_four_info["gameOver"]:
+        mark = ""
+        if connect_four_info["turn"] == ctx.author:
+            mark = connect_four_info["icons"]["ball_1"] if connect_four_info["turn"] == connect_four_info["player2"] \
+                else connect_four_info["icons"]["ball_2"]
+            if 0 < pos < connect_four_info["board_size"]["length"]:
+                if any(connect_four_info["board"][i][pos - 1] == connect_four_info["icons"]["cell"] for i in range(connect_four_info["board_size"]["height"])):
+                    position = 5
+                    while connect_four_info["board"][position][pos - 1] != connect_four_info["icons"]["cell"]:
+                        position -= 1
+                    connect_four_info["board"][position][pos - 1] = mark
+                    connect_four_info["count"] += 1
+
+                    for line in connect_four_info["board"]:
+                        await ctx.send(" ".join(line))
+
+                    connect_four_check_winner(mark)
+                    if connect_four_info["gameOver"]:
+                        embed = discord.Embed(
+                            title=f"Победа {mark} :exclamation:",
+                            colour=discord.Colour.purple()
+                        )
+                        await ctx.send(embed=embed)
+                    elif connect_four_info["count"] >= 42:
+                        connect_four_info["gameOver"] = True
+                        embed = discord.Embed(
+                            title="Ничья :exclamation:",
+                            colour=discord.Colour.purple()
+                        )
+                        await ctx.send(embed=embed)
+                    if connect_four_info["turn"] == connect_four_info["player1"]:
+                        connect_four_info["turn"] = connect_four_info["player2"]
+                    elif connect_four_info["turn"] == connect_four_info["player2"]:
+                        connect_four_info["turn"] = connect_four_info["player1"]
+                else:
+                    await ctx.send("Ряд уже переполнен")
+            else:
+                await ctx.send("Неверный столбец")
+        else:
+            await ctx.send("Сейчас не ваш ход")
+    else:
+        await ctx.send(f"Начните новую игру используя комнду {prefix}с4")
+
+
+def connect_four_check_winner(mark):
+    global connect_four_info
+    board = connect_four_info["board"]
+    col, row = len(connect_four_info["board"][0]), len(connect_four_info["board"])
+    columns = [[] for _ in range(col)]
+    rows = [[] for _ in range(row)]
+    left_diagonals = [[] for _ in range(row + col - 1)]
+    right_diagonals = [[] for _ in range(len(left_diagonals))]
+    k = 1 - row
+
+    for x in range(col):
+        for y in range(row):
+            columns[x].append(board[y][x])
+            rows[y].append(board[y][x])
+            left_diagonals[x + y].append(board[y][x])
+            right_diagonals[x - y - k].append(board[y][x])
+    left_diagonals = left_diagonals[3:-3]
+    right_diagonals = right_diagonals[3:-3]
+    for lines in [columns, rows, right_diagonals, left_diagonals]:
+        for line in lines:
+            if mark * 4 in "".join(line):
+                connect_four_info["gameOver"] = True
+                return
+
+
+@connect_four.error
+async def connect_four_error(ctx, error):
+    if isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send("Необходимо два игрока")
+    elif isinstance(error, commands.BadArgument):
+        await ctx.send("Убедитесь что вы указали участника.")
+
+
+@connect_four_place.error
+async def connect_four_place_error(ctx, error):
+    if isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send("Вы не указали позицию")
+    elif isinstance(error, commands.BadArgument):
+        await ctx.send("Вы ввели не число")
+
+
+@bot.command(name="c4_rules")
+async def connect_four_place_rules(ctx):
+    global connect_four_info
+    embed = discord.Embed(
+        title="Информация о **4 в ряд**",
+        description=f'{connect_four_info["icons"]["ball_1"]} {connect_four_info["icons"]["ball_2"]}',
+        colour=discord.Colour.purple()
+    )
+    embed.add_field(name="Команды",
+                    value=f"""**{prefix}с4 <member1> <member2>** - начало игры игры в 4 в ряд с указанием игроков.
+    **{prefix}c4_place <number>** - команда для установки броска фишки в нужный столбик (число от 1 до {connect_four_info["board_size"]["length"]})
+Полем является доска 6х7.
+    __Все команды вводятся **латинскими буквами**__""",
+                    inline=False)
     await ctx.send(embed=embed)
 
 

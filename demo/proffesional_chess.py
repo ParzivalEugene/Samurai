@@ -148,4 +148,5 @@ class Bishop(Piece):
             return False
         if x1 - y1 == x2 - y2:
             step = 1 if x2 >= x1 else -1
-            for i in range(x1 + step, x2, )
+            for i in range(x1 + step, x2, 0):
+                pass
