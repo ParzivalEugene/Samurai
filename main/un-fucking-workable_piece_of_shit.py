@@ -1,15 +1,23 @@
 import discord
 from discord.ext import commands, tasks
-from tokens import *
+from cogs.utils import ClearQueue
+from cogs import config
+from cogs import music
+from cogs import search
 import requests
 import json
 import re
 import random
 from keep_alive import keep_alive
 from datetime import date
+import spotify
+import threading
+import logging
+import asyncio
 
 prefix = "."
 bot = commands.Bot(command_prefix=prefix, help_command=None)
+logged_in_event = threading.Event()
 
 tic_tac_toe_info = {
     "player1": "",
@@ -58,6 +66,11 @@ phrases = {
         "грустно", "одиноко", "печально", "горько", "тоскливо", "хуево", "умираю"
     ]
 }
+
+
+def connection_state_listener(session):
+    if session.connection.state is spotify.ConnectionState.LOGGED_IN:
+        logged_in_event.set()
 
 
 def get_quote():
@@ -184,6 +197,9 @@ async def my_help(ctx):
 __Все команды вводятся **латинскими буквами**__""",
                     inline=False)
     await ctx.send(embed=embed)
+
+
+"""------------------------------------TIC-TAC-TOE------------------------------------------------"""
 
 
 @bot.command(name="xo_rules")
@@ -340,7 +356,7 @@ async def test(ctx):
 async def check_birthday():
     today = str(date.today())[5:]
     table = []
-    with open("birthdays.json", "r") as input_file:
+    with open("database/birthdays.json", "r") as input_file:
         data = json.load(input_file)
         for i in range(len(data["bd"])):
             info = list(data["bd"][i].keys())[0]
@@ -359,6 +375,9 @@ async def check_birthday():
                                   "здесь тебе всегда будут рады.",
                             inline=False)
             await bot.get_channel(778544220054224906).send(embed=embed)
+
+
+"""----------------------------------BIRTHDAYS-DATA-----------------------------------------------"""
 
 
 @bot.command(name="bd_rules")
@@ -382,7 +401,7 @@ async def show_birthday_table(ctx):
         title="ДНИ РОЖДЕНИЯ",
         colour=discord.Colour.purple()
     )
-    with open("birthdays.json", "r") as file:
+    with open("database/birthdays.json", "r") as file:
         data = json.load(file)
         for person in range(len(data["bd"])):
             if not person:
@@ -400,7 +419,7 @@ async def add_birthday_date(ctx, month: int, day: int):
     if not any(i.id == 778542601690284034 for i in ctx.author.roles):
         await ctx.send("У вас недостачно высокая роль для этой команды")
         return
-    with open("birthdays.json") as info:
+    with open("database/birthdays.json") as info:
         birthdays = json.load(info)
         if any(str(ctx.author.id) in i.keys() for i in birthdays["bd"]):
             await ctx.send("Вы уже указали свою дату")
@@ -409,7 +428,7 @@ async def add_birthday_date(ctx, month: int, day: int):
             await ctx.send("Вы указали неверную дату")
             return
         birthdays["bd"].append({ctx.author.id: {"month": month, "day": day}})
-        with open("birthdays.json", "w") as outfile:
+        with open("database/birthdays.json", "w") as outfile:
             json.dump(birthdays, outfile)
         await ctx.send("Данные успешно внесены")
 
@@ -436,7 +455,7 @@ async def get_forecast(ctx, *place: str):
                                 "q": place,
                                 "lang": "ru",
                                 "units": "metric",
-                                "APPID": app_id_for_forecast
+                                "APPID": config.app_id_for_forecast
                             }).json()
     if response["cod"] != "200":
         await ctx.send("Не удалось найти информацию")
@@ -468,6 +487,9 @@ async def magic_ball(ctx, *message):
     )
     embed.set_footer(text=f"Вопрос: {message}")
     await ctx.send(embed=embed)
+
+
+"""-----------------------------------CONNECT-FOUR------------------------------------------------"""
 
 
 @bot.command(name="c4")
@@ -605,5 +627,19 @@ async def connect_four_place_rules(ctx):
     await ctx.send(embed=embed)
 
 
+session = spotify.Client(config.user, config.secret)
+loop = spotify.Set(session)
+loop.start()
+session.on(
+    spotify.SessionEvent.CONNECTION_STATE_UPDATED,
+    connection_state_listener
+)
+
+logged_in_event.wait()
+session.preferred_bitrate(spotify.Bitrate.BITRATE_320k)
+playlist = ClearQueue()
+bot.add_cog(search.Search(bot, session, playlist))
+bot.add_cog(music.Music(bot, session, playlist))
+
 keep_alive()
-bot.run(token_for_bot)
+bot.run(config.token_for_bot)
