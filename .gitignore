@@ -3,8 +3,8 @@
 /main/cogs/__init__.py
 /demo/
 /main/cogs/utils.py
-/main/cogs/search.py
-/main/cogs/player.py
+/main/cogs/demo/search.py
+/main/cogs/demo/player.py
 /main/cogs/music.py
 /main/cogs/config.py
 /main/test.py

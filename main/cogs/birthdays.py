@@ -33,7 +33,7 @@ class Birthdays(commands.Cog):
                                 inline=False)
                 await self.bot.get_channel(778544220054224906).send(embed=embed)
 
-    @commands.command(name="bd_rules")
+    @commands.command(name="bd_help")
     async def rules_birthday(self, ctx):
         embed = discord.Embed(
             title="Информация о календаре дней рождений",

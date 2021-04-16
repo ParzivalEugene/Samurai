@@ -26,7 +26,6 @@ class MiniCogs(commands.Cog):
 
     @commands.command(name="forecast")
     async def get_forecast(self, ctx, *, place: str):
-        place = " ".join(place)
         response = requests.get("http://api.openweathermap.org/data/2.5/find",
                                 params={
                                     "q": place,

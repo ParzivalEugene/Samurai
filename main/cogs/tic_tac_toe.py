@@ -33,12 +33,12 @@ class TicTacToe(commands.Cog):
         )
         embed.add_field(name="Команды",
                         value=f"""**{prefix}xo <member1> <member2>** - начало игры игры в крестики-нолики с указанием игроков.
-    **{prefix}xo_place <number>** - команда для установки Х или О в нужное место (число от 1 до 9)
-    поле представляет из себя 
-    :one: :two: :three:
-    :four: :five: :six:
-    :seven: :eight: :nine:
-    __Все команды вводятся **латинскими буквами**__""",
+**{prefix}xo_place <number>** - команда для установки Х или О в нужное место (число от 1 до 9)
+поле представляет из себя 
+:one: :two: :three:
+:four: :five: :six:
+:seven: :eight: :nine:
+__Все команды вводятся **латинскими буквами**__""",
                         inline=False)
         await ctx.send(embed=embed)
 

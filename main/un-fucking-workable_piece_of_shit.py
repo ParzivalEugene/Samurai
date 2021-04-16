@@ -3,7 +3,7 @@ from discord.ext import commands, tasks
 from cogs.utils import ClearQueue
 from cogs import config
 from cogs import music
-from cogs import search
+from cogs.demo import search
 import requests
 import json
 import re
@@ -12,8 +12,6 @@ from keep_alive import keep_alive
 from datetime import date
 import spotify
 import threading
-import logging
-import asyncio
 
 prefix = "."
 bot = commands.Bot(command_prefix=prefix, help_command=None)

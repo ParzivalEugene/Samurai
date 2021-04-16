@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+from cogs.config import *
 import json
 import requests
 import re
@@ -64,13 +65,81 @@ class Chatting(commands.Cog):
         embed.set_footer(text="")
         return embed
 
+    @commands.command(name="help")
+    async def my_help(self, ctx):
+        embed = discord.Embed(
+            title=f"SAMURAI",
+            description="Я пиздатый, на хуйню я слил зарплату. Братик я заменю тебе мать и отца блять, я умею все. "
+                        "Какой-нибудь пидорас обижает, пиши мне - разобьем ему ебало. Можешь играть через меня в игры "
+                        f"с друзьями (если есть {self.get_emoji('kavo')}). Могу тебе на шарманочке поиграть, "
+                        f"монетку подкинуть или судьбу рассказать. Как ты понял я бля ахуенный, вот список комманд.",
+            colour=discord.Colour.purple()
+        )
+        embed.set_footer(text="Say your prayers, Moron!")
+        embed.set_image(url="https://cdn.discordapp.com/attachments/783747422898880533/828266665602580500/ghostrunner-review.jpg")
+        embed.add_field(
+            name="Воспроизведение музыки",
+            value=f"""**{prefix}player_help** - отдельный эмбед для вывода помощи по плэеру
+**{prefix}join** - зайду в голосовой канала, в котором находится автор сообщения.
+**{prefix}leave** - уйду из голосового канала
+**{prefix}queue** - выведу очередь треков
+**{prefix}queue <url>** - добавлю в очередь трек
+**{prefix}remove <number>** - удалю трек под номером <number>
+**{prefix}play** - начну играть музыку из очереди
+"**{prefix}pause** - поставлю на паузу шарманку
+**{prefix}resume** - воспроизведу воспроизведение {self.get_emoji('sho')}
+**{prefix}stop** - уберу трек из очереди и остановлю проигрывание""",
+            inline=False
+        )
+        embed.add_field(
+            name="Крестики-нолики :negative_squared_cross_mark: :o2:",
+            value=f"""**{prefix}xo_rules** - отдельный эмбед для вывода инфы о крестиках ноликах
+**{prefix}xo <member1> <member2>** - начало игры с указанием двух юзеров
+**{prefix}xo_place <number>** - поместит нужный символ в клетку
+:one: :two: :three:
+:four: :five: :six:
+:seven: :eight: :nine:""",
+            inline=False
+        )
+        embed.add_field(
+            name="Четыре в ряд :blue_square: :yellow_square:",
+            value=f"""**{prefix}c4_rules** - отдельный эмбед для вывода инфы о четыре в ряд
+**{prefix}c4 <member1> <member2>** - начало игры с указанием двух участников
+**{prefix}c4_place <number>** - бросок фишки в колонку с указанным номером""",
+            inline=False
+        )
+        embed.add_field(
+            name=f"Дни рождения {self.get_emoji('wowcry')}",
+            value=f"""**{prefix}bd_help** - выведу тебе отдельную помощь по дням рождениям
+**{prefix}bd <month> <day>** - для пользователей с высокой ролью есть возможность получить поздравления от меня, используя эту команду
+**{prefix}bd_show** - выводит список дней рождений юзеров""",
+            inline=False
+        )
+        embed.add_field(
+            name=f"Прочие команды {self.get_emoji('peepoban')}",
+            value=f"""**{prefix}toss** - подкинет монетку
+**{prefix}8ball <message>** - дам тебе ответы на все вопросы {self.get_emoji('reeee')}
+**{prefix}forecast <place>** - выведу прогноз погоды в заданном месте""",
+            inline=False
+        )
+        embed.add_field(
+            name="Реакции на сообщения",
+            value=f"""Будете обижать меня - буду хуярить в ответ у бля {self.get_emoji("fuck")}.
+Если тебе грустно - кину тебе котика. Скажешь что я пиздатый - я тебя расцелую сладенький мой {self.get_emoji("giggle")}.
+Напишешь кот или кошка - кину котика, такая же хуйня с собакой или песиком.
+Короче будь лапочкой, я слежу за тобой, малыш."""
+        )
+        await ctx.send(embed=embed)
+
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        await self.bot.get_channel(783742051556655174).send(member.name, "присоединлся к серверу")
+        channel = discord.utils.get(member.guild.channels, name='server_test')
+        await channel.send(member.name, "присоединлся к серверу")
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
-        await self.bot.get_channel(783742051556655174).send(member.name, "покинул сервер")
+        channel = discord.utils.get(member.guild.channels, name='server_test')
+        await channel.send(member.name, "покинул сервер")
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -106,3 +175,7 @@ class Chatting(commands.Cog):
         elif msg.startswith("арина сука"):
             await message.channel.send("согласен")
             await message.channel.send(self.get_emoji("ahuet"))
+
+    @commands.command(name="r_test")
+    async def test(self, ctx):
+        await ctx.message.add_reaction("⏸")

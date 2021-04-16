@@ -26,7 +26,6 @@ class LevelSystem(commands.Cog):
                 xp -= 50 * ((level - 1) ** 2) + 50 * (level - 1)
                 if not xp:
                     await message.channel.send(f"Ебать пожилой {message.author.mention}, ты апнулся на **level: {level}**!")
-                    levels["level"][]
                     for i in range(len(self.roles)):
                         if level == self.level_num[i]:
                             await message.author.add_roles(discord.utils.get(message.author.guild.roles, name=self.roles[i]))
@@ -46,7 +45,7 @@ class LevelSystem(commands.Cog):
             levels = json.load(info)
             if any(str(ctx.author.id) in i.keys() for i in levels["levels"]):
                 xp = levels["levels"][0][str(ctx.author.id)]["xp"]
-                xp = levels["levels"][0][str(message.author.id)]["xp"]
+                xp = levels["levels"][0][str(ctx.author.id)]["xp"]
                 level = 0
                 while True:
                     if xp < 50 * (level ** 2) + 50 * (level - 1):
@@ -54,14 +53,14 @@ class LevelSystem(commands.Cog):
                     level += 1
                 xp -= 50 * ((level - 1) ** 2) + 50 * (level - 1)
                 if not xp:
-                    await message.channel.send(f"Ебать пожилой {message.author.mention}, ты апнулся на **level: {level}**!")
+                    await ctx.channel.send(f"Ебать пожилой {ctx.author.mention}, ты апнулся на **level: {level}**!")
                     for i in range(len(self.roles)):
                         if level == self.level_num[i]:
-                            await message.author.add_roles(discord.utils.get(message.author.guild.roles, name=self.roles[i]))
+                            await ctx.author.add_roles(discord.utils.get(ctx.author.guild.roles, name=self.roles[i]))
                             embed = discord.Embed(
-                                description=f"{message.author.mention} Поздравляю с новой ролью братик **{self.roles[i]}**"
+                                description=f"{ctx.author.mention} Поздравляю с новой ролью братик **{self.roles[i]}**"
                             )
-                            embed.set_thumbnail(url=message.author.avatar_url)
-                            await message.channel.send(embed=embed)
+                            embed.set_thumbnail(url=ctx.author.avatar_url)
+                            await ctx.channel.send(embed=embed)
             else:
                 await ctx.send("Братик ты еще ничего писал, какой нахуй ранг")
