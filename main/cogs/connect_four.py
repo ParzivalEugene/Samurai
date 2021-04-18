@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from cogs.config import *
-import random
+from random import choice
 
 
 class ConnectFour(commands.Cog):
@@ -32,9 +32,10 @@ class ConnectFour(commands.Cog):
         )
         embed.add_field(name="Команды",
                         value=f"""**{prefix}с4 <member1> <member2>** - начало игры игры в 4 в ряд с указанием игроков.
-        **{prefix}c4_place <number>** - команда для установки броска фишки в нужный столбик (число от 1 до {self.board_size["length"]})
-    Полем является доска 6х7.
-        __Все команды вводятся **латинскими буквами**__""",
+**{prefix}c4_place <number>** - команда для установки броска фишки в нужный столбик (число от 1 до {self.board_size["length"]})
+Полем является доска 6х7.
+**{prefix}c4_lose** - команда, чтобы участник, который сейчас ходит, мог сдаться
+__Все команды вводятся **латинскими буквами**__""",
                         inline=False)
         await ctx.send(embed=embed)
 
@@ -53,7 +54,7 @@ class ConnectFour(commands.Cog):
             for line in self.board:
                 await ctx.send(" ".join(line))
 
-            num = random.choice((1, 2))
+            num = choice((1, 2))
             if num == 1:
                 self.turn = self.player1
                 await ctx.send("Сейчас ходит <@" + str(self.player1.id) + ">")
@@ -103,6 +104,19 @@ class ConnectFour(commands.Cog):
         else:
             await ctx.send(f"Начните новую игру используя комнду {prefix}с4")
 
+    @commands.command(name="c4_lose")
+    async def connect_four_lose(self, ctx):
+        if self.game_over:
+            return await ctx.send(choice([
+                "Внучок ты даже не повоевал, а уже сдаешься", "Блять сынок сначала повоюй, потом сдавайся", "Ты еще не играешь не во что долбаебка, нахуй сдаешься"
+            ]))
+        self.game_over = True
+        embed = discord.Embed(
+            title=f"{self.turn.mention} сдался:exclamation:",
+            colour=discord.Colour.purple()
+        )
+        await ctx.send(embed=embed)
+
     def connect_four_check_winner(self, mark):
         col, row = len(self.board[0]), len(self.board)
         columns = [[] for _ in range(col)]
@@ -127,14 +141,33 @@ class ConnectFour(commands.Cog):
 
     @connect_four.error
     async def connect_four_error(self, ctx, error):
-        if isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send("Необходимо два игрока")
-        elif isinstance(error, commands.BadArgument):
-            await ctx.send("Убедитесь что вы указали участника.")
+        async with ctx.typing():
+            if not self.game_over:
+                await ctx.send(choice([
+                    "Блять сынок игра идет", "Еще играем сука подожди", "Блять видишь война, позже", "Молодежь торопиться, подожди еще"
+                ]))
+            elif isinstance(error, commands.MissingRequiredArgument):
+                await ctx.send(choice([
+                    "Сынок ебать, два участника надо", "Внучок зови друга или со мной играй, два игрока надо"
+                ]))
+            elif isinstance(error, commands.BadArgument):
+                await ctx.send(choice([
+                    "Бля ты какую то хуйню мне скормил, я сломался", "Не пихай сюда нихуя кроме участников"
+                ]))
 
     @connect_four_place.error
     async def connect_four_place_error(self, ctx, error):
-        if isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send("Вы не указали позицию")
-        elif isinstance(error, commands.BadArgument):
-            await ctx.send("Вы ввели не число")
+        async with ctx.typing():
+            if self.game_over:
+                await ctx.send(choice([
+                    "Блять да мамке своей поставь нахуй, нет активных игр", "Сука где ты видишь активную игру, тогда нахуя ты мне блять свое си четыре блять плейс пишешь уу молодеж ебобаная",
+                    "Сука внучок нет активных игр, нахуй ставишь"
+                ]))
+            elif isinstance(error, commands.MissingRequiredArgument):
+                await ctx.send(choice([
+                    "Блять куда ставить то ебана", "Ебать я чо тогадаться должен куда ты поставить хочешь", "Сука внучок ебаный, я ебу куда ставить"
+                ]))
+            elif isinstance(error, commands.BadArgument):
+                await ctx.send(choice([
+                    "Бля ты какую то хуйню мне скормил, я сломался", "Не пихай сюда нихуя кроме числа", "Вот бля шутник ебучий, сюда надо пихать число, пездюк маленький"
+                ]))

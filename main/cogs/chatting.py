@@ -76,6 +76,7 @@ class Chatting(commands.Cog):
             colour=discord.Colour.purple()
         )
         embed.set_footer(text="Say your prayers, Moron!")
+        embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/783747422898880533/832654922952474674/20200121_182041.jpg")
         embed.set_image(url="https://cdn.discordapp.com/attachments/783747422898880533/828266665602580500/ghostrunner-review.jpg")
         embed.add_field(
             name="Воспроизведение музыки",
@@ -86,7 +87,7 @@ class Chatting(commands.Cog):
 **{prefix}queue <url>** - добавлю в очередь трек
 **{prefix}remove <number>** - удалю трек под номером <number>
 **{prefix}play** - начну играть музыку из очереди
-"**{prefix}pause** - поставлю на паузу шарманку
+**{prefix}pause** - поставлю на паузу шарманку
 **{prefix}resume** - воспроизведу воспроизведение {self.get_emoji('sho')}
 **{prefix}stop** - уберу трек из очереди и остановлю проигрывание""",
             inline=False
@@ -132,6 +133,11 @@ class Chatting(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.Cog.listener()
+    async def on_command_error(self, ctx, error):
+        if isinstance(error, commands.CommandNotFound):
+            await ctx.send("Пожилой, я таких команд не знаю")
+
+    @commands.Cog.listener()
     async def on_member_join(self, member):
         channel = discord.utils.get(member.guild.channels, name='server_test')
         await channel.send(member.name, "присоединлся к серверу")
@@ -150,9 +156,9 @@ class Chatting(commands.Cog):
 
         """Commands ------------------------------------------------------------------------------"""
 
-        if msg.startswith("кот"):
+        if any(msg.startswith(i) for i in ("кот", "кош", "cat", "kitty")):
             await message.channel.send(embed=self.embed_cat(message.author))
-        elif any(msg.startswith(i) for i in ("пес", "соба")):
+        elif any(msg.startswith(i) for i in ("пес", "соба", "dog", "woof")):
             await message.channel.send(embed=self.embed_dog(message.author))
         elif msg.startswith("вдохновение"):
             await message.channel.send(self.get_quote())
@@ -178,4 +184,9 @@ class Chatting(commands.Cog):
 
     @commands.command(name="r_test")
     async def test(self, ctx):
-        await ctx.message.add_reaction("⏸")
+        await ctx.send("sh")
+        print(1)
+        await self.test1(ctx)
+
+    async def test1(self, ctx):
+        await ctx.send("sho???")
