@@ -40,69 +40,110 @@ __Все команды вводятся **латинскими буквами**
         await ctx.send(embed=embed)
 
     @commands.command(name="c4")
-    async def connect_four(self, ctx, p1: discord.Member, p2: discord.Member):
-        if self.game_over:
-            if p1 == self.bot.user or p2 == self.bot.user:
-                await ctx.send("К сожалению я не могу с вами играть")
-                return
-            self.board = [[self.icons["cell"] for _ in range(self.board_size["length"])] for _ in range(self.board_size["height"])]
-            self.game_over = False
-            self.count = 0
-            self.player1 = p1
-            self.player2 = p2
+    async def connect_four(self, ctx, player1: discord.Member, player2: discord.Member):
+        """Function for initialize new game"""
 
-            for line in self.board:
-                await ctx.send(" ".join(line))
+        """----------------------------------Errors check-----------------------------------------"""
 
-            num = choice((1, 2))
-            if num == 1:
-                self.turn = self.player1
-                await ctx.send("Сейчас ходит <@" + str(self.player1.id) + ">")
-            elif num == 2:
-                self.turn = self.player2
-                await ctx.send("Сейчас ходит <@" + str(self.player2.id) + ">")
-        else:
-            await ctx.send("Игра в прогрессе. Завершите текущую, затем начните новую.")
+        if not self.game_over:
+            async with ctx.typing():
+                return await ctx.send(choice([
+                    "Сладенький ты еще здесь недовоевал, либо сдавайся, либо продолжай сосать",
+                    "Дедуля ты еще не доиграл", "Пожилой доиграй игру, а потом стартуй новую или сдавайся нахуй"
+                ]))
+        if player1 == player2 == self.bot.user:
+            async with ctx.typing():
+                return await ctx.send(choice([
+                    "Я блять тебе бои роботов показывать не буду иди нахуй", "Сука над дедом издевается, я перед тобой плясать не буду", "Маму свою с самой собой заставь играть"
+                ]))
+        if player1 == player2 == ctx.author:
+            async with ctx.typing():
+                return await ctx.send(choice([
+                    "Ты еблан блять сам с собой играть", "Дедуля в маразм впал, сам с собой играть хочет", "Сука с самим собой нельзя играть"
+                ]))
+        if player1 == player2:
+            async with ctx.typing():
+                return await ctx.send(choice([
+                    "Бля ты его за дебила держишь, он не может сам с собой играть", "Сука нельзя играть с самим собой блять"
+                ]))
+        if player1.bot and player2.bot:
+            async with ctx.typing():
+                return await ctx.send(choice([
+                    "Чумба эти дурачки не настолько умные, чтобы в игрушки играть", "Ебать ты этих ослов за кого считаешь, они блять тупые играть не умеют",
+                    "Эти ослики не такие умные для этого", "Бля это тебе цирк что-ли, дарку ботов он хочет. Я этих дурачков в обиду не дам",
+                    "Бля ты тот челик, который в фифе ставит ботов друг с другом играть, ебантяй ты"
+                ]))
+        elif player1 == self.bot.user or player2 == self.bot.user:
+            async with ctx.typing():
+                return await ctx.send(choice([
+                    "Молодой я еще не научился в эту парашу играть и нахуй оно мне не надо", "Бля у тебя чо друзей нет, я не умею в эту парашу играть", "Не напрягай старого, не буду я в это играть"
+                ]))
+
+        """-------------------------------initializing new game-----------------------------------"""
+
+        self.board = [[self.icons["cell"] for _ in range(self.board_size["length"])] for _ in range(self.board_size["height"])]
+        self.game_over = False
+        self.count = 0
+        self.player1 = player1
+        self.player2 = player2
+
+        self.turn = choice([self.player1, self.player2])
+        await self.print_board(ctx)
+        await ctx.send(f"Первым ходит {self.turn.mention}")
 
     @commands.command(name="c4_place")
     async def connect_four_place(self, ctx, pos: int):
-        if not self.game_over:
-            if self.turn == ctx.author:
-                mark = self.icons["ball_1"] if self.turn == self.player2 else self.icons["ball_2"]
-                if 0 < pos < self.board_size["length"]:
-                    if any(self.board[i][pos - 1] == self.icons["cell"] for i in range(self.board_size["height"])):
-                        position = 5
-                        while self.board[position][pos - 1] != self.icons["cell"]:
-                            position -= 1
-                        self.board[position][pos - 1] = mark
-                        self.count += 1
+        if self.game_over:
+            async with ctx.typing():
+                return await ctx.send(choice([
+                    "Пожилой блять ты с кем воюешь, нет активных игр", "Внучок блять, чо деда наебать пытаешься, еще никто не играет", "Бля зелебобка активные игры отсутствуют, стартуй новую",
+                    "Бля я для кого правила делал сука, перед тем как хуйню свою высирать начни новую игру, барбосы блять старого не уважают"
+                ]))
+        if self.turn not in [self.player1, self.player2]:
+            async with ctx.typing():
+                return await ctx.reply(choice([
+                    "Сука малой блять, не видишь ребятишки играют, а тебя я в списке игроков не вижу", "Блять не лезь сука дебил ебаный, ОНО ТЕБЯ СОЖРЕТ, внучок сейчас другие играют",
+                    "Блять ты вроде не даун, тогда нахуй ты пукаешь свой блять .с4_place сука, другие играют ебаный сыр",
+                    "бля я щас тебе ебальничек твой прелестный расхуепердолю, внучок, другие играют"
+                ]))
+        if self.turn != ctx.author:
+            async with ctx.typing():
+                return await ctx.send(choice([
+                    "Не твой ход молодой", "Блять сейчас не ты ходишь внучок", "Бля дедуля медленно выводит, не спеши молодой", "Молодеж блять не торопитесь, не твой ход внучок"
+                ]))
+        if 0 < pos < self.board_size["length"]:
+            async with ctx.typing():
+                return await ctx.send(choice([
+                    f"Блять молодой позиция от 1 до {self.board_size['length']}", "Сука неверная позиция", "Неправильно ставишь", "Деда наебать пытается, неверная позиция"
+                ]))
+        if not any(self.board[i][pos - 1] == self.icons["cell"] for i in range(self.board_size["height"])):
+            async with ctx.typing():
+                return await ctx.send(choice([
+                    "Пожилой этот столбец занят", "Внучок сюда ставить нельзя, занято ебана", "Ебать копать этот столбец занят", "Не пизди старому, сюда нельзя ставить"
+                ]))
+        mark = self.icons["ball_1"] if self.turn == self.player2 else self.icons["ball_2"]
+        position = 5
+        while self.board[position][pos - 1] != self.icons["cell"]:
+            position -= 1
+        self.board[position][pos - 1] = mark
+        self.count += 1
 
-                        for line in self.board:
-                            await ctx.send(" ".join(line))
-
-                        self.connect_four_check_winner(mark)
-                        if self.game_over:
-                            embed = discord.Embed(
-                                title=f"Победа {mark} :exclamation:",
-                                colour=discord.Colour.purple()
-                            )
-                            await ctx.send(embed=embed)
-                        elif self.count >= 42:
-                            self.game_over = True
-                            embed = discord.Embed(
-                                title="Ничья :exclamation:",
-                                colour=discord.Colour.purple()
-                            )
-                            await ctx.send(embed=embed)
-                        self.turn = self.player1 if self.turn == self.player2 else self.player2
-                    else:
-                        await ctx.send("Ряд уже переполнен")
-                else:
-                    await ctx.send("Неверный столбец")
-            else:
-                await ctx.send("Сейчас не ваш ход")
-        else:
-            await ctx.send(f"Начните новую игру используя комнду {prefix}с4")
+        await self.print_board(ctx)
+        self.connect_four_check_winner(mark)
+        if self.game_over:
+            embed = discord.Embed(
+                title=f"Победа {self.turn.mention} {self.icons[mark]}:exclamation:",
+                colour=discord.Colour.purple()
+            )
+            await ctx.send(embed=embed)
+        if self.count >= 9:
+            self.game_over = True
+            embed = discord.Embed(
+                title="Ничья:exclamation:",
+                colour=discord.Colour.purple()
+            )
+            await ctx.send(embed=embed)
+        self.turn = self.player1 if self.turn == self.player2 else self.player2
 
     @commands.command(name="c4_lose")
     async def connect_four_lose(self, ctx):
@@ -138,6 +179,10 @@ __Все команды вводятся **латинскими буквами**
                 if mark * 4 in "".join(line):
                     self.game_over = True
                     return
+
+    async def print_board(self, ctx):
+        await ctx.send("\n".join([" ".join(i) for i in self.board]))
+        return
 
     @connect_four.error
     async def connect_four_error(self, ctx, error):

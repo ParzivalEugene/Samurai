@@ -7,6 +7,7 @@ from cogs.chatting import Chatting
 from cogs.mini_cogs import MiniCogs
 from cogs.birthdays import Birthdays
 from cogs.music_player import Player
+from cogs.translator import DeepTranslator
 from keep_alive import keep_alive
 
 bot = commands.Bot(command_prefix=prefix, help_command=None)
@@ -28,5 +29,6 @@ bot.add_cog(Chatting(bot))
 bot.add_cog(ConnectFour(bot))
 bot.add_cog(TicTacToe(bot))
 bot.add_cog(Player(bot))
+bot.add_cog(DeepTranslator(bot))
 keep_alive()
 bot.run(token_for_bot)

@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands
 from cogs.config import *
-import json
 import requests
 import re
 
@@ -19,14 +18,6 @@ class Chatting(commands.Cog):
                 "грустно", "одиноко", "печально", "горько", "тоскливо", "хуево", "умираю"
             ]
         }
-
-    @staticmethod
-    def get_quote():
-        """Return random quote"""
-        response = requests.get("https://zenquotes.io/api/random")
-        json_data = json.loads(response.text)
-        quote = ' - '.join([json_data[0]['q'], json_data[0]['a']])
-        return quote
 
     def get_emoji(self, name):
         """Return emoji by name"""
@@ -79,7 +70,7 @@ class Chatting(commands.Cog):
         embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/783747422898880533/832654922952474674/20200121_182041.jpg")
         embed.set_image(url="https://cdn.discordapp.com/attachments/783747422898880533/828266665602580500/ghostrunner-review.jpg")
         embed.add_field(
-            name="Воспроизведение музыки",
+            name="Воспроизведение музыки :track_previous: :stop_button: :play_pause:",
             value=f"""**{prefix}player_help** - отдельный эмбед для вывода помощи по плэеру
 **{prefix}join** - зайду в голосовой канала, в котором находится автор сообщения.
 **{prefix}leave** - уйду из голосового канала
@@ -124,7 +115,7 @@ class Chatting(commands.Cog):
             inline=False
         )
         embed.add_field(
-            name="Реакции на сообщения",
+            name=f"Реакции на сообщения {self.get_emoji('peepohappy')}",
             value=f"""Будете обижать меня - буду хуярить в ответ у бля {self.get_emoji("fuck")}.
 Если тебе грустно - кину тебе котика. Скажешь что я пиздатый - я тебя расцелую сладенький мой {self.get_emoji("giggle")}.
 Напишешь кот или кошка - кину котика, такая же хуйня с собакой или песиком.
@@ -136,6 +127,8 @@ class Chatting(commands.Cog):
     async def on_command_error(self, ctx, error):
         if isinstance(error, commands.CommandNotFound):
             await ctx.send("Пожилой, я таких команд не знаю")
+        if error:
+            raise error
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
@@ -160,8 +153,6 @@ class Chatting(commands.Cog):
             await message.channel.send(embed=self.embed_cat(message.author))
         elif any(msg.startswith(i) for i in ("пес", "соба", "dog", "woof")):
             await message.channel.send(embed=self.embed_dog(message.author))
-        elif msg.startswith("вдохновение"):
-            await message.channel.send(self.get_quote())
 
         """Reacting on basic phrases -------------------------------------------------------------"""
 
@@ -182,11 +173,14 @@ class Chatting(commands.Cog):
             await message.channel.send("согласен")
             await message.channel.send(self.get_emoji("ahuet"))
 
-    @commands.command(name="r_test")
-    async def test(self, ctx):
-        await ctx.send("sh")
-        print(1)
-        await self.test1(ctx)
-
+    @commands.command(name="test")
     async def test1(self, ctx):
-        await ctx.send("sho???")
+        def check(message):
+            return message.author.id == ctx.author.id
+        await ctx.send("Как тебя зовут?")
+        try:
+            msg = await self.bot.wait_for("message", check=check, timeout=10)
+        except TimeoutError:
+            return await ctx.send("Время вышло")
+        await ctx.send(f"Привет {msg.author}!")
+

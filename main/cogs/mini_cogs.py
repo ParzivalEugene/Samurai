@@ -3,6 +3,8 @@ from discord.ext import commands
 import random
 import requests
 from cogs.config import *
+import json
+from deep_translator import GoogleTranslator
 
 
 class MiniCogs(commands.Cog):
@@ -43,6 +45,21 @@ class MiniCogs(commands.Cog):
             colour=discord.Colour.purple()
         )
         embed.set_thumbnail(url=f"http://openweathermap.org/img/wn/{response['weather'][0]['icon']}.png")
+        await ctx.send(embed=embed)
+
+    @commands.command(name="вдохновение")
+    async def get_quote(self, ctx):
+        """Return random quote"""
+        response = requests.get("https://zenquotes.io/api/random")
+        json_data = json.loads(response.text)
+        quote = ' - '.join([json_data[0]['q'], json_data[0]['a']])
+        translated_message = GoogleTranslator(source="en", target="ru").translate(quote)
+        embed = discord.Embed(
+            title="Вдохновение",
+            description=translated_message,
+            colour=discord.Colour.purple()
+        )
+        embed.set_footer(text=f"original: {quote}")
         await ctx.send(embed=embed)
 
     @get_forecast.error

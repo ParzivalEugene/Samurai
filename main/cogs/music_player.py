@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 from discord.voice_client import VoiceClient
+from cogs.config import *
 import youtube_dl
 import random
 import asyncio
@@ -166,4 +167,21 @@ class Player(commands.Cog):
 
     @commands.command(name="player_help")
     async def player_help(self, ctx):
-        pass
+        embed = discord.Embed(
+            title="Player help",
+            description=":track_previous: :stop_button: :play_pause:",
+            colour=discord.Colour.purple()
+        )
+        embed.add_field(name="Команды",
+                        value=f"""**{prefix}player_help** - отдельный эмбед для вывода помощи по плэеру
+**{prefix}join** - зайду в голосовой канала, в котором находится автор сообщения.
+**{prefix}leave** - уйду из голосового канала
+**{prefix}queue** - выведу очередь треков
+**{prefix}queue <url>** - добавлю в очередь трек
+**{prefix}remove <number>** - удалю трек под номером <number>
+**{prefix}play** - начну играть музыку из очереди
+**{prefix}pause** - поставлю на паузу шарманку
+**{prefix}resume** - воспроизведу воспроизведение
+**{prefix}stop** - уберу трек из очереди и остановлю проигрывание""",
+                        inline=False)
+        await ctx.send(embed=embed)
