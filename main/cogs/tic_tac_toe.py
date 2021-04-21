@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 from random import choice
+from cogs.commands import commands_names
 from cogs.config import *
 
 
@@ -32,7 +33,7 @@ class TicTacToe(commands.Cog):
             [2, 4, 6]
         ]
 
-    @commands.command(name="xo_rules")
+    @commands.command(name=commands_names["tic tac toe"]["help"])
     async def tic_tac_toe_rules(self, ctx):
         embed = discord.Embed(
             title="Информация о **крестиках-ноликах**",
@@ -40,18 +41,18 @@ class TicTacToe(commands.Cog):
             colour=discord.Colour.purple()
         )
         embed.add_field(name="Команды",
-                        value=f"""**{prefix}xo <member1> <member2>** - начало игры игры в крестики-нолики с указанием игроков. Укажешь меня, я с тобой скатаю.
-**{prefix}xo_place <number>** - команда для установки Х или О в нужное место (число от 1 до 9)
-поле представляет из себя 
+                        value=f"""Модуль с крестиками-ноликами для игр с друзьями или мной
+**{prefix}{commands_names["tic tac toe"]["help"]}** - отдельный эмбед для вывода инфы о крестиках ноликах
+**{prefix}{commands_names["tic tac toe"]["init game"]} <member1> <member2>** - начало игры с указанием двух юзеров
+**{prefix}{commands_names["tic tac toe"]["place"]} <number>** - поместит нужный символ в клетку
 :one: :two: :three:
 :four: :five: :six:
 :seven: :eight: :nine:
-**{prefix}xo_lose** - команда, чтобы участник, который сейчас ходит, мог сдаться
-__Все команды вводятся **латинскими буквами**__""",
+**{prefix}{commands_names["tic tac toe"]["lose"]}** - текущий игрок сдастся""",
                         inline=False)
         await ctx.send(embed=embed)
 
-    @commands.command(name="xo")
+    @commands.command(name=commands_names["tic tac toe"]["init game"])
     async def tic_tac_toe_start(self, ctx, player1: discord.Member, player2: discord.Member, game_type="ai"):
         """Function for initialize new game"""
 
@@ -120,7 +121,7 @@ __Все команды вводятся **латинскими буквами**
         if self.turn.bot:
             await self.bot_place(ctx)
 
-    @commands.command(name="xo_place")
+    @commands.command(name=commands_names["tic tac toe"]["place"])
     async def tic_tac_toe_place(self, ctx, pos: int):
         """Function for place figure in current position"""
 
@@ -169,7 +170,7 @@ __Все команды вводятся **латинскими буквами**
         if not (self.game_type is None) and not self.game_over:
             await self.bot_place(ctx)
 
-    @commands.command(name="xo_lose")
+    @commands.command(name=commands_names["tic tac toe"]["lose"])
     async def tic_tac_toe_lose(self, ctx):
         if self.game_over:
             return await ctx.send(choice([

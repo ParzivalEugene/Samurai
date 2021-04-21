@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 from cogs.config import *
+from cogs.commands import commands_names
 from random import choice
 
 
@@ -23,7 +24,7 @@ class ConnectFour(commands.Cog):
                 "length": 7
         }
 
-    @commands.command(name="c4_rules")
+    @commands.command(name=commands_names["connect four"]["help"])
     async def connect_four_place_rules(self, ctx):
         embed = discord.Embed(
             title="Информация о **4 в ряд**",
@@ -31,15 +32,15 @@ class ConnectFour(commands.Cog):
             colour=discord.Colour.purple()
         )
         embed.add_field(name="Команды",
-                        value=f"""**{prefix}с4 <member1> <member2>** - начало игры игры в 4 в ряд с указанием игроков.
-**{prefix}c4_place <number>** - команда для установки броска фишки в нужный столбик (число от 1 до {self.board_size["length"]})
-Полем является доска 6х7.
-**{prefix}c4_lose** - команда, чтобы участник, который сейчас ходит, мог сдаться
-__Все команды вводятся **латинскими буквами**__""",
+                        value=f"""Аналогичный модуль крестикам-ноликам, катай с друзьями или со мной
+**{prefix}{commands_names["connect four"]["help"]}** - отдельный эмбед для вывода инфы о четыре в ряд
+**{prefix}{commands_names["connect four"]["init game"]} <member1> <member2>** - начало игры с указанием двух участников
+**{prefix}{commands_names["connect four"]["place"]} <number>** - бросок фишки в колонку с указанным номером
+**{prefix}{commands_names["connect four"]["lose"]}** - текущий игрок сдастся""",
                         inline=False)
         await ctx.send(embed=embed)
 
-    @commands.command(name="c4")
+    @commands.command(name=commands_names["connect four"]["init game"])
     async def connect_four(self, ctx, player1: discord.Member, player2: discord.Member):
         """Function for initialize new game"""
 
@@ -91,7 +92,7 @@ __Все команды вводятся **латинскими буквами**
         await self.print_board(ctx)
         await ctx.send(f"Первым ходит {self.turn.mention}")
 
-    @commands.command(name="c4_place")
+    @commands.command(name=commands_names["connect four"]["place"])
     async def connect_four_place(self, ctx, pos: int):
         if self.game_over:
             async with ctx.typing():
@@ -145,7 +146,7 @@ __Все команды вводятся **латинскими буквами**
             await ctx.send(embed=embed)
         self.turn = self.player1 if self.turn == self.player2 else self.player2
 
-    @commands.command(name="c4_lose")
+    @commands.command(name=commands_names["connect four"]["lose"])
     async def connect_four_lose(self, ctx):
         if self.game_over:
             return await ctx.send(choice([

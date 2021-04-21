@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from discord.voice_client import VoiceClient
 from cogs.config import *
+from cogs.commands import commands_names
 import youtube_dl
 import random
 import asyncio
@@ -52,7 +53,29 @@ class Player(commands.Cog):
         self.bot = bot
         self.queue = []
 
-    @commands.command(name="join")
+    @commands.command(name=commands_names["music player"]["help"])
+    async def player_help(self, ctx):
+        embed = discord.Embed(
+            title="Player help",
+            description=":track_previous: :stop_button: :play_pause:",
+            colour=discord.Colour.purple()
+        )
+        embed.add_field(name="Команды",
+                        value=f"""Этот модуль был создан, чтобы ты мог чилить со своими друзьями в голосовом канале и параллельно слушать любимый музон
+**{prefix}{commands_names["music player"]["help"]}** - отдельный эмбед для вывода помощи по плэеру
+**{prefix}{commands_names["music player"]["join"]}** - зайду в голосовой канала, в котором находится автор сообщения.
+**{prefix}{commands_names["music player"]["leave"]}** - уйду из голосового канала
+**{prefix}{commands_names["music player"]["queue"]}** - выведу очередь треков
+**{prefix}{commands_names["music player"]["queue"]} <url>** - добавлю в очередь трек
+**{prefix}{commands_names["music player"]["remove"]} <number>** - удалю трек под номером <number>
+**{prefix}{commands_names["music player"]["play"]}** - начну играть музыку из очереди
+**{prefix}{commands_names["music player"]["pause"]}** - поставлю на паузу шарманку
+**{prefix}{commands_names["music player"]["resume"]}** - воспроизведу воспроизведение
+**{prefix}{commands_names["music player"]["stop"]}** - уберу трек из очереди и остановлю проигрывание""",
+                        inline=False)
+        await ctx.send(embed=embed)
+
+    @commands.command(name=commands_names["music player"]["join"])
     async def join(self, ctx):
         if not ctx.message.author.voice:
             return await ctx.send(random.choice(
@@ -65,7 +88,7 @@ class Player(commands.Cog):
         ))
         await channel.connect()
 
-    @commands.command(name="leave")
+    @commands.command(name=commands_names["music player"]["leave"])
     async def leave(self, ctx):
         voice_client = ctx.message.guild.voice_client
         if not voice_client:
@@ -78,7 +101,7 @@ class Player(commands.Cog):
         ))
         await voice_client.disconnect()
 
-    @commands.command(name="queue")
+    @commands.command(name=commands_names["music player"]["queue"])
     async def queue(self, ctx, url):
         video_title = pafy.new(url).title
         self.queue.append([url, "".join(video_title)])
@@ -104,7 +127,7 @@ class Player(commands.Cog):
         if isinstance(error, commands.BadArgument):
             await ctx.send("Хуевый аргумент я сломался")
 
-    @commands.command(name="remove")
+    @commands.command(name=commands_names["music player"]["remove"])
     async def remove(self, ctx, number):
         if not len(self.queue):
             await ctx.send("пустая очередь, нихуя я не удалю")
@@ -122,7 +145,7 @@ class Player(commands.Cog):
         if isinstance(error, commands.BadArgument):
             await ctx.send("Хуевый аргумент я сломался")
 
-    @commands.command(name="play")
+    @commands.command(name=commands_names["music player"]["play"])
     async def play(self, ctx):
         voice_client = discord.utils.get(ctx.bot.voice_clients, guild=ctx.guild)
         if not (voice_client and voice_client.is_connected()):
@@ -144,44 +167,23 @@ class Player(commands.Cog):
         await ctx.send(embed=embed)
         del self.queue[0]
 
-    @commands.command(name="pause")
+    @commands.command(name=commands_names["music player"]["pause"])
     async def pause(self, ctx):
         server = ctx.message.guild
         voice_channel = server.voice_client
         voice_channel.pause()
         await ctx.message.add_reaction("⏸")
 
-    @commands.command(name="resume")
+    @commands.command(name=commands_names["music player"]["resume"])
     async def resume(self, ctx):
         server = ctx.message.guild
         voice_channel = server.voice_client
         voice_channel.resume()
         await ctx.message.add_reaction("▶️")
 
-    @commands.command(name="stop")
+    @commands.command(name=commands_names["music player"]["stop"])
     async def stop(self, ctx):
         server = ctx.message.guild
         voice_channel = server.voice_client
         voice_channel.stop()
         await ctx.message.add_reaction("⏹")
-
-    @commands.command(name="player_help")
-    async def player_help(self, ctx):
-        embed = discord.Embed(
-            title="Player help",
-            description=":track_previous: :stop_button: :play_pause:",
-            colour=discord.Colour.purple()
-        )
-        embed.add_field(name="Команды",
-                        value=f"""**{prefix}player_help** - отдельный эмбед для вывода помощи по плэеру
-**{prefix}join** - зайду в голосовой канала, в котором находится автор сообщения.
-**{prefix}leave** - уйду из голосового канала
-**{prefix}queue** - выведу очередь треков
-**{prefix}queue <url>** - добавлю в очередь трек
-**{prefix}remove <number>** - удалю трек под номером <number>
-**{prefix}play** - начну играть музыку из очереди
-**{prefix}pause** - поставлю на паузу шарманку
-**{prefix}resume** - воспроизведу воспроизведение
-**{prefix}stop** - уберу трек из очереди и остановлю проигрывание""",
-                        inline=False)
-        await ctx.send(embed=embed)

@@ -3,7 +3,9 @@ from discord.ext import commands
 import random
 import requests
 from cogs.config import *
+from cogs.commands import commands_names
 import json
+from random import choice
 from deep_translator import GoogleTranslator
 
 
@@ -11,22 +13,22 @@ class MiniCogs(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="toss")
+    @commands.command(name=commands_names["mini cogs"]["head or tails"])
     async def heads_or_tails(self, ctx):
         answers = [":bird: Орел :bird:", ":coin: Решка :coin:"]
         await ctx.send(random.choice(answers))
 
-    @commands.command(name="8ball")
+    @commands.command(name=commands_names["mini cogs"]["magic ball"])
     async def magic_ball(self, ctx, *message):
         message = " ".join(message)
         embed = discord.Embed(
-            title=":crystal_ball: говорит: " + random.choice("да, нет, возможно, я не знаю, скорее всего да, скорее всего нет, определенно нет, определенно да, 50/50, лучше вам не знать".split(", ")),
+            title=":crystal_ball: говорит: " + random.choice("да; нет; возможно; я не знаю; скорее всего да; скорее всего нет; мать ставлю, что нет; 50/50; мать ставлю, что да".split("; ")),
             colour=discord.Colour.purple()
         )
         embed.set_footer(text=f"Вопрос: {message}")
         await ctx.send(embed=embed)
 
-    @commands.command(name="forecast")
+    @commands.command(name=commands_names["mini cogs"]["get forecast"])
     async def get_forecast(self, ctx, *, place: str):
         response = requests.get("http://api.openweathermap.org/data/2.5/find",
                                 params={
@@ -47,7 +49,7 @@ class MiniCogs(commands.Cog):
         embed.set_thumbnail(url=f"http://openweathermap.org/img/wn/{response['weather'][0]['icon']}.png")
         await ctx.send(embed=embed)
 
-    @commands.command(name="вдохновение")
+    @commands.command(name=commands_names["mini cogs"]["quote"])
     async def get_quote(self, ctx):
         """Return random quote"""
         response = requests.get("https://zenquotes.io/api/random")
@@ -65,6 +67,8 @@ class MiniCogs(commands.Cog):
     @get_forecast.error
     async def get_forecast_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send("Вы не указали место")
+            await ctx.send(choice([
+                "Молодой я ебу в каком городе ты хочешь узнать прогоз", "Внучок а место то какое", "Сынок а где город то"
+            ]))
         if isinstance(error, commands.BadArgument):
             await ctx.send("Вы неверно указали место")

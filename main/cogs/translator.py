@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from deep_translator import GoogleTranslator, single_detection
 from cogs.config import *
+from cogs.commands import commands_names
 from random import choice
 import requests
 import json
@@ -119,7 +120,19 @@ class DeepTranslator(commands.Cog):
                                        'zh-tw': 'chinese (traditional)',
                                        'zu': 'zulu'}
 
-    @commands.command(name="translate")
+    @commands.command(name=commands_names["translator"]["help"])
+    async def translator_help(self):
+        embed = discord.Embed(
+            title="Помощь по модулю translator",
+            description=":u6307: :left_right_arrow: :regional_indicator_a:",
+            colour=discord.Colour.purple()
+        )
+        embed.add_field(
+            name="Команды",
+            value=f"""{prefix}{commands_names}"""
+        )
+
+    @commands.command(name=commands_names["translator"]["translate"])
     async def translate(self, ctx, *words):
         """"""
         async with ctx.typing():
@@ -169,7 +182,7 @@ class DeepTranslator(commands.Cog):
         async with ctx.typing():
             await ctx.send(embed=embed)
 
-    @commands.command(name="get_lang")
+    @commands.command(name=commands_names["translator"]["detect language"])
     async def detect_language(self, ctx, *message):
         language = single_detection(" ".join(message), api_key=api_key_for_single_detection)
         embed = discord.Embed(
@@ -180,7 +193,7 @@ class DeepTranslator(commands.Cog):
         async with ctx.typing():
             await ctx.send(embed=embed)
 
-    @commands.command(name="lang_list")
+    @commands.command(name=commands_names["translator"]["list of languages"])
     async def language_list(self, ctx):
         embed = discord.Embed(
             title=":a: Список кратких обозначений языков :b:",
@@ -189,7 +202,7 @@ class DeepTranslator(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    @commands.command(name="what_the_lang")
+    @commands.command(name=commands_names["translator"]["game detect languages"])
     async def what_the_language_game(self, ctx):
         def check(text):
             return text.author != self.bot.user and not text.content.startswith(".")

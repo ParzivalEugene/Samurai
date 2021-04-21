@@ -1,6 +1,8 @@
 import discord
 from discord.ext import commands
 from cogs.config import *
+from cogs.commands import commands_names
+from random import choice
 import requests
 import re
 
@@ -56,14 +58,13 @@ class Chatting(commands.Cog):
         embed.set_footer(text="")
         return embed
 
-    @commands.command(name="help")
+    @commands.command(name=commands_names["chatting"]["help"])
     async def my_help(self, ctx):
         embed = discord.Embed(
             title=f"SAMURAI",
-            description="Я пиздатый, на хуйню я слил зарплату. Братик я заменю тебе мать и отца блять, я умею все. "
-                        "Какой-нибудь пидорас обижает, пиши мне - разобьем ему ебало. Можешь играть через меня в игры "
-                        f"с друзьями (если есть {self.get_emoji('kavo')}). Могу тебе на шарманочке поиграть, "
-                        f"монетку подкинуть или судьбу рассказать. Как ты понял я бля ахуенный, вот список комманд.",
+            description="Я пиздатый, на хуйню я слил зарплату. Братик я заменю тебе мать и отца блять, я умею все. Какой-нибудь пидорас обижает, пиши мне - разобьем ему ебало. Можешь играть через "
+                        f"меня в игры с друзьями (если есть {self.get_emoji('kavo')}). Могу тебе на шарманочке поиграть, монетку подкинуть или судьбу рассказать. Хочешь перевести что-нибудь, "
+                        f"или определить, что за язык, пиши мне ебана, все расскажу. Как ты понял я бля ахуенный, вот список комманд.",
             colour=discord.Colour.purple()
         )
         embed.set_footer(text="Say your prayers, Moron!")
@@ -71,62 +72,82 @@ class Chatting(commands.Cog):
         embed.set_image(url="https://cdn.discordapp.com/attachments/783747422898880533/828266665602580500/ghostrunner-review.jpg")
         embed.add_field(
             name="Воспроизведение музыки :track_previous: :stop_button: :play_pause:",
-            value=f"""**{prefix}player_help** - отдельный эмбед для вывода помощи по плэеру
-**{prefix}join** - зайду в голосовой канала, в котором находится автор сообщения.
-**{prefix}leave** - уйду из голосового канала
-**{prefix}queue** - выведу очередь треков
-**{prefix}queue <url>** - добавлю в очередь трек
-**{prefix}remove <number>** - удалю трек под номером <number>
-**{prefix}play** - начну играть музыку из очереди
-**{prefix}pause** - поставлю на паузу шарманку
-**{prefix}resume** - воспроизведу воспроизведение {self.get_emoji('sho')}
-**{prefix}stop** - уберу трек из очереди и остановлю проигрывание""",
+            value=f"""Этот модуль был создан, чтобы ты мог чилить со своими друзьями в голосовом канале и параллельно слушать любимый музон {self.get_emoji("sadpanda")}
+**{prefix}{commands_names["music player"]["help"]}** - отдельный эмбед для вывода помощи по плэеру
+**{prefix}{commands_names["music player"]["join"]}** - зайду в голосовой канала, в котором находится автор сообщения.
+**{prefix}{commands_names["music player"]["leave"]}** - уйду из голосового канала
+**{prefix}{commands_names["music player"]["queue"]}** - выведу очередь треков
+**{prefix}{commands_names["music player"]["queue"]} <url>** - добавлю в очередь трек
+**{prefix}{commands_names["music player"]["remove"]} <number>** - удалю трек под номером <number>
+**{prefix}{commands_names["music player"]["play"]}** - начну играть музыку из очереди
+**{prefix}{commands_names["music player"]["pause"]}** - поставлю на паузу шарманку
+**{prefix}{commands_names["music player"]["resume"]}** - воспроизведу воспроизведение {self.get_emoji('sho')}
+**{prefix}{commands_names["music player"]["stop"]}** - уберу трек из очереди и остановлю проигрывание""",
             inline=False
         )
         embed.add_field(
             name="Крестики-нолики :negative_squared_cross_mark: :o2:",
-            value=f"""**{prefix}xo_rules** - отдельный эмбед для вывода инфы о крестиках ноликах
-**{prefix}xo <member1> <member2>** - начало игры с указанием двух юзеров
-**{prefix}xo_place <number>** - поместит нужный символ в клетку
+            value=f"""Модуль с крестиками-ноликами для игр с друзьями или мной
+**{prefix}{commands_names["tic tac toe"]["help"]}** - отдельный эмбед для вывода инфы о крестиках ноликах
+**{prefix}{commands_names["tic tac toe"]["init game"]} <member1> <member2>** - начало игры с указанием двух юзеров
+**{prefix}{commands_names["tic tac toe"]["place"]} <number>** - поместит нужный символ в клетку
 :one: :two: :three:
 :four: :five: :six:
-:seven: :eight: :nine:""",
+:seven: :eight: :nine:
+**{prefix}{commands_names["tic tac toe"]["lose"]}** - текущий игрок сдастся""",
             inline=False
         )
         embed.add_field(
             name="Четыре в ряд :blue_square: :yellow_square:",
-            value=f"""**{prefix}c4_rules** - отдельный эмбед для вывода инфы о четыре в ряд
-**{prefix}c4 <member1> <member2>** - начало игры с указанием двух участников
-**{prefix}c4_place <number>** - бросок фишки в колонку с указанным номером""",
+            value=f"""Аналогичный модуль крестикам-ноликам, катай с друзьями или со мной
+**{prefix}{commands_names["connect four"]["help"]}** - отдельный эмбед для вывода инфы о четыре в ряд
+**{prefix}{commands_names["connect four"]["init game"]} <member1> <member2>** - начало игры с указанием двух участников
+**{prefix}{commands_names["connect four"]["place"]} <number>** - бросок фишки в колонку с указанным номером
+**{prefix}{commands_names["connect four"]["lose"]}** - текущий игрок сдастся""",
             inline=False
         )
         embed.add_field(
             name=f"Дни рождения {self.get_emoji('wowcry')}",
-            value=f"""**{prefix}bd_help** - выведу тебе отдельную помощь по дням рождениям
-**{prefix}bd <month> <day>** - для пользователей с высокой ролью есть возможность получить поздравления от меня, используя эту команду
-**{prefix}bd_show** - выводит список дней рождений юзеров""",
+            value=f"""Я, в отличии от друзей, всегда поздравлю тебя в тот самый день
+**{prefix}{commands_names["birthdays"]["help"]}** - выведу тебе отдельную помощь по дням рождениям
+**{prefix}{commands_names["birthdays"]["add birthday"]} <month> <day>** - для пользователей с высокой ролью есть возможность получить поздравления от меня, используя эту команду
+**{prefix}{commands_names["birthdays"]["show birthdays"]}** - выводит список дней рождений юзеров""",
+            inline=False
+        )
+        embed.add_field(
+            name=f"{self.get_emoji('reeee')} Модуль переводчик {self.get_emoji('thinksmart1')}",
+            value=f"""Я смогу перевести все что ты захочешь с любого на любой язык, определить язык тоже не проблема. Также можем поиграть в игру угадай язык.
+**{prefix}{commands_names["translator"]["help"]}** - помогу тебе отдельным эмбедом со всеми командами
+**{prefix}{commands_names["translator"]["list of languages"]}** - в следующих командах и играх ты должен будешь вводить язык и для упрощения я введ систему кратких обозначений, эта команда выведет их
+**{prefix}{commands_names["translator"]["translate"]} <source lang> <target lang> <message>** - переведу фразу с исходного языка на итоговый
+**{prefix}{commands_names["translator"]["translate"]} <target lang> <message>** - сам определю исходный язык и переведу тебе все на указанный язык (иногда могу ошибаться, тогда юзай команду выше)
+**{prefix}{commands_names["translator"]["detect language"]} <message>** - выведу тебе язык исходного сообщения
+**{prefix}{commands_names["translator"]["game detect languages"]}** - начну игру "угадай язык" и буду ждать твоего ответа""",
             inline=False
         )
         embed.add_field(
             name=f"Прочие команды {self.get_emoji('peepoban')}",
-            value=f"""**{prefix}toss** - подкинет монетку
-**{prefix}8ball <message>** - дам тебе ответы на все вопросы {self.get_emoji('reeee')}
-**{prefix}forecast <place>** - выведу прогноз погоды в заданном месте""",
+            value=f"""Команды, которые я в душе не ебу в какой модуль пихать, поэтому считай что это некий unsorted. Сборник мелких забавных команд.
+**{prefix}{commands_names["mini cogs"]["head or tails"]}** - подкинет монетку
+**{prefix}{commands_names["mini cogs"]["magic ball"]} <message>** - дам тебе ответы на все вопросы {self.get_emoji('reeee')}
+**{prefix}{commands_names["mini cogs"]["get forecast"]} <place>** - выведу прогноз погоды в заданном месте
+**{prefix}{commands_names["mini cogs"]["quote"]}** - вдохновлю тебя на великие свершения""",
             inline=False
         )
         embed.add_field(
             name=f"Реакции на сообщения {self.get_emoji('peepohappy')}",
-            value=f"""Будете обижать меня - буду хуярить в ответ у бля {self.get_emoji("fuck")}.
-Если тебе грустно - кину тебе котика. Скажешь что я пиздатый - я тебя расцелую сладенький мой {self.get_emoji("giggle")}.
-Напишешь кот или кошка - кину котика, такая же хуйня с собакой или песиком.
-Короче будь лапочкой, я слежу за тобой, малыш."""
+            value=f"Я блять считай как живой, реагирую на все обращения к себе. Будете обижать меня - буду хуярить в ответ у бля {self.get_emoji('fuck')}. Если тебе грустно - кину тебе котика. "
+                  f"Скажешь что я пиздатый - я тебя расцелую сладенький мой {self.get_emoji('giggle')}. Напишешь кот или кошка - кину котика, такая же хуйня с собакой или песиком. Короче будь "
+                  "лапочкой, я слежу за тобой, малыш."
         )
         await ctx.send(embed=embed)
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
         if isinstance(error, commands.CommandNotFound):
-            await ctx.send("Пожилой, я таких команд не знаю")
+            await ctx.send(choice([
+                "Внучок, я таких команд не знаю", "Боевой это чо за команда", "*\Бип\* - *\Боп\* неизвестная мне команда"
+            ]))
         if error:
             raise error
 
@@ -162,25 +183,18 @@ class Chatting(commands.Cog):
             await message.channel.send("туда ее")
             await message.channel.send(self.get_emoji("julia"))
         elif any(phrase in msg for phrase in self.phrases["insults"]):
-            await message.channel.send("мать твоя блять, сын собаки")
-            await message.channel.send(self.get_emoji('kavo'))
+            await message.channel.send(choice([
+                f"Блять обижать старого решил сука, я же тебе ебальник набью, понял? Я уже договорился, за тобой едут, последний понедельник блять живешь {self.get_emoji('ahuet')}",
+                f"Мать твоя блять сын собаки {self.get_emoji('kavo')}", f"Попущенных никто не спрашивал {self.get_emoji('fuck')}"
+            ]))
         elif any(phrase in msg for phrase in self.phrases["compliments"]):
-            await message.channel.send("люблю тебя зайка " + str(self.get_emoji("wowcry")))
+            await message.channel.send(choice([
+                f"Ты же мой пупсик сладенький, люблю тебя {self.get_emoji('wowcry')}", f"Бля я тебя обожаю солнышко мое {self.get_emoji('pandalove')}",
+                f"Блять какой же ты зайка, ты меня смущаешь {self.get_emoji('giggle')}", "Целую мое солнышко в лобик", "Ты экстра супер пупсик :heart:"
+            ]))
         elif any(phrase in msg for phrase in self.phrases["sad"]):
             await message.channel.send("не грусти зайка, вот тебе котик")
             await message.channel.send(embed=self.embed_cat(message.author))
         elif msg.startswith("арина сука"):
             await message.channel.send("согласен")
             await message.channel.send(self.get_emoji("ahuet"))
-
-    @commands.command(name="test")
-    async def test1(self, ctx):
-        def check(message):
-            return message.author.id == ctx.author.id
-        await ctx.send("Как тебя зовут?")
-        try:
-            msg = await self.bot.wait_for("message", check=check, timeout=10)
-        except TimeoutError:
-            return await ctx.send("Время вышло")
-        await ctx.send(f"Привет {msg.author}!")
-
