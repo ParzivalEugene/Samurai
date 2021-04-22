@@ -134,7 +134,6 @@ class DeepTranslator(commands.Cog):
 
     @commands.command(name=commands_names["translator"]["translate"])
     async def translate(self, ctx, *words):
-        """"""
         async with ctx.typing():
             if not words:
                 return await ctx.send(choice([
@@ -229,9 +228,9 @@ class DeepTranslator(commands.Cog):
         self.active_game = False
         print(msg.content)
         if msg.content == language:
-            return await ctx.send([
+            return await ctx.send(choice([
                 "Молодец боевой угадал", "Уважаю внучок, правильно ответил", "Абсолютно верно молодеж", "Порадовали деда, правильно сказали"
-            ])
+            ]))
         await ctx.send(choice([
             "Бля расстроили деда, не угадал. ", "Сука неверно ебана, грустно мне( ", "Обижают старичка, неверно нихуя. "
         ]) + f"Верный ответ: {language} - {self.google_translator_keys[language]}")
