@@ -68,7 +68,7 @@ class Birthdays(commands.Cog):
 
     @commands.command(name=commands_names["birthdays"]["add birthday"])
     async def add_birthday_date(self, ctx, month: int, day: int):
-        if not any(i.id == 778542601690284034 for i in ctx.author.roles):
+        if not any(i.id == 694548925612425317 for i in ctx.author.roles):
             await ctx.send(choice([
                 "Внучок у тебя слишком низкая роль для этой команды", "Пожилой тебе эту команду еще рано юзать", "Молодой, слишком низкая роль, чтобы юзать эту команду"
             ]))

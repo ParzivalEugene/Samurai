@@ -25,7 +25,7 @@ class ConnectFour(commands.Cog):
         }
 
     @commands.command(name=commands_names["connect four"]["help"])
-    async def connect_four_place_rules(self, ctx):
+    async def connect_four_place_help(self, ctx):
         embed = discord.Embed(
             title="Информация о **4 в ряд**",
             description=f'{self.icons["ball_1"]} {self.icons["ball_2"]}',
@@ -34,10 +34,28 @@ class ConnectFour(commands.Cog):
         embed.add_field(name="Команды",
                         value=f"""Аналогичный модуль крестикам-ноликам, катай с друзьями или со мной
 **{prefix}{commands_names["connect four"]["help"]}** - отдельный эмбед для вывода инфы о четыре в ряд
+**{prefix}{commands_names["connect four"]["rules"]}** - отдельный эмбед для вывода правил четыре в ряд
 **{prefix}{commands_names["connect four"]["init game"]} <member1> <member2>** - начало игры с указанием двух участников
 **{prefix}{commands_names["connect four"]["place"]} <number>** - бросок фишки в колонку с указанным номером
 **{prefix}{commands_names["connect four"]["lose"]}** - текущий игрок сдастся""",
                         inline=False)
+        await ctx.send(embed=embed)
+
+    @commands.command(name=commands_names["connect four"]["rules"])
+    async def connect_four_place_rules(self, ctx):
+        embed = discord.Embed(
+            title="Информация о **4 в ряд**",
+            description=f'{self.icons["ball_1"]} {self.icons["ball_2"]}',
+            colour=discord.Colour.purple()
+        )
+        embed.add_field(name="Правила",
+                        value="Цель игры — расположить раньше противника подряд по горизонтали, вертикали или диагонали четыре фишки своего цвета. Существуют варианты игры с полем разного размера, "
+                              "с фишками в форме дисков или шариков. Наиболее распространенный вариант, также называемый классическим, 7x6. \n"
+                              "[Wikipedia](https://ru.wikipedia.org/wiki/%D0%A7%D0%B5%D1%82%D1%8B%D1%80%D0%B5_%D0%B2_%D1%80%D1%8F%D0%B4)",
+                        inline=False)
+        embed.set_thumbnail(
+            url="https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Wikipedia-logo-v2.svg/1200px-Wikipedia-logo-v2.svg.png"
+        )
         await ctx.send(embed=embed)
 
     @commands.command(name=commands_names["connect four"]["init game"])

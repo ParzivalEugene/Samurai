@@ -8,9 +8,12 @@ from cogs.mini_cogs import MiniCogs
 from cogs.birthdays import Birthdays
 from cogs.music_player import Player
 from cogs.translator import DeepTranslator
+from cogs.click_to_roles import ClickToRoles
 from keep_alive import keep_alive
 
-bot = commands.Bot(command_prefix=prefix, help_command=None)
+intents = discord.Intents.default()
+intents.members = True
+bot = commands.Bot(command_prefix=prefix, help_command=None, intents=intents)
 
 
 @bot.event
@@ -30,5 +33,6 @@ bot.add_cog(ConnectFour(bot))
 bot.add_cog(TicTacToe(bot))
 bot.add_cog(Player(bot))
 bot.add_cog(DeepTranslator(bot))
+bot.add_cog(ClickToRoles(bot))
 keep_alive()
 bot.run(token_for_bot)

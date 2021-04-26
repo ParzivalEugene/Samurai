@@ -15,7 +15,8 @@ commands_names = {
         "game detect languages": "tr_game"
     },
     "connect four": {
-        "help": "c4_rules",
+        "help": "c4_help",
+        "rules": "c4_rules",
         "init game": "c4",
         "place": "c4_place",
         "lose": "c4_lose"
@@ -38,7 +39,8 @@ commands_names = {
         "stop": "stop"
     },
     "tic tac toe": {
-        "help": "xo_rules",
+        "help": "xo_help",
+        "rules": "xo_rules",
         "init game": "xo",
         "place": "xo_place",
         "lose": "xo_lose"

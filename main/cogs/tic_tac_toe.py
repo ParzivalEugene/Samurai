@@ -34,15 +34,16 @@ class TicTacToe(commands.Cog):
         ]
 
     @commands.command(name=commands_names["tic tac toe"]["help"])
-    async def tic_tac_toe_rules(self, ctx):
+    async def tic_tac_toe_help(self, ctx):
         embed = discord.Embed(
-            title="Информация о **крестиках-ноликах**",
+            title="Информация о модуле **крестики-нолики**",
             description=":negative_squared_cross_mark: :o2:",
             colour=discord.Colour.purple()
         )
         embed.add_field(name="Команды",
                         value=f"""Модуль с крестиками-ноликами для игр с друзьями или мной
 **{prefix}{commands_names["tic tac toe"]["help"]}** - отдельный эмбед для вывода инфы о крестиках ноликах
+**{prefix}{commands_names["tic tac toe"]["rules"]}** - отдельный эмбед для вывода правил крестиков ноликов
 **{prefix}{commands_names["tic tac toe"]["init game"]} <member1> <member2>** - начало игры с указанием двух юзеров
 **{prefix}{commands_names["tic tac toe"]["place"]} <number>** - поместит нужный символ в клетку
 :one: :two: :three:
@@ -50,6 +51,24 @@ class TicTacToe(commands.Cog):
 :seven: :eight: :nine:
 **{prefix}{commands_names["tic tac toe"]["lose"]}** - текущий игрок сдастся""",
                         inline=False)
+        await ctx.send(embed=embed)
+
+    @commands.command(name=commands_names["tic tac toe"]["rules"])
+    async def tic_tac_toe_rules(self, ctx):
+        embed = discord.Embed(
+            title="Информация о **крестиках-ноликах**",
+            description=":negative_squared_cross_mark: :o2:",
+            colour=discord.Colour.purple()
+        )
+        embed.add_field(name="Правила",
+                        value="Игроки по очереди ставят на свободные клетки поля 3х3 знаки (один всегда крестики, другой всегда нолики). Первый, выстроивший в ряд 3 своих фигуры по вертикали, "
+                              "горизонтали или диагонали, выигрывает. Первый ход делает игрок, ставящий крестики.\n Обычно по завершении партии выигравшая сторона зачёркивает чертой свои три знака "
+                              "(нолика или крестика), составляющих сплошной ряд.\n"
+                              "[Wikipedia](https://ru.wikipedia.org/wiki/%D0%9A%D1%80%D0%B5%D1%81%D1%82%D0%B8%D0%BA%D0%B8-%D0%BD%D0%BE%D0%BB%D0%B8%D0%BA%D0%B8)",
+                        inline=False)
+        embed.set_thumbnail(
+            url="https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Wikipedia-logo-v2.svg/1200px-Wikipedia-logo-v2.svg.png"
+        )
         await ctx.send(embed=embed)
 
     @commands.command(name=commands_names["tic tac toe"]["init game"])

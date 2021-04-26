@@ -48,6 +48,10 @@ class Chatting(commands.Cog):
             contents = requests.get('https://random.dog/woof.json').json()
             url = contents['url']
             file_extension = re.search("([^.]*)$", url).group(1).lower()
+
+        # url = "https://dog.ceo/api/breeds/image/random"
+        # response = requests.get(url=url).json()
+        # data = response["message"]
         data = url
         embed = discord.Embed(
             title="Пёсик :smiling_face_with_3_hearts:",
@@ -89,6 +93,7 @@ class Chatting(commands.Cog):
             name="Крестики-нолики :negative_squared_cross_mark: :o2:",
             value=f"""Модуль с крестиками-ноликами для игр с друзьями или мной
 **{prefix}{commands_names["tic tac toe"]["help"]}** - отдельный эмбед для вывода инфы о крестиках ноликах
+**{prefix}{commands_names["tic tac toe"]["rules"]}** - отдельный эмбед для вывода правил крестиков ноликов
 **{prefix}{commands_names["tic tac toe"]["init game"]} <member1> <member2>** - начало игры с указанием двух юзеров
 **{prefix}{commands_names["tic tac toe"]["place"]} <number>** - поместит нужный символ в клетку
 :one: :two: :three:
@@ -101,6 +106,7 @@ class Chatting(commands.Cog):
             name="Четыре в ряд :blue_square: :yellow_square:",
             value=f"""Аналогичный модуль крестикам-ноликам, катай с друзьями или со мной
 **{prefix}{commands_names["connect four"]["help"]}** - отдельный эмбед для вывода инфы о четыре в ряд
+**{prefix}{commands_names["connect four"]["rules"]}** - отдельный эмбед для вывода правил четыре в ряд
 **{prefix}{commands_names["connect four"]["init game"]} <member1> <member2>** - начало игры с указанием двух участников
 **{prefix}{commands_names["connect four"]["place"]} <number>** - бросок фишки в колонку с указанным номером
 **{prefix}{commands_names["connect four"]["lose"]}** - текущий игрок сдастся""",
@@ -153,13 +159,13 @@ class Chatting(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        channel = discord.utils.get(member.guild.channels, name='server_test')
-        await channel.send(member.name, "присоединлся к серверу")
+        channel = self.bot.get_channel(783742051556655174)  # участники
+        await channel.send(member.mention, "присоединлся к серверу")
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
-        channel = discord.utils.get(member.guild.channels, name='server_test')
-        await channel.send(member.name, "покинул сервер")
+        channel = self.bot.get_channel(783742051556655174)  # участники
+        await channel.send(member.mention, "покинул сервер")
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -198,3 +204,74 @@ class Chatting(commands.Cog):
         elif msg.startswith("арина сука"):
             await message.channel.send("согласен")
             await message.channel.send(self.get_emoji("ahuet"))
+
+    @commands.has_role("SHOGUNS")
+    @commands.command(name="print_click_to_role")
+    async def test(self, ctx):
+        embed = discord.Embed(
+            title="Click to role",
+            description=f"**Wassup mate**{self.get_emoji('hattip')}! Если ты не хочешь остаться голым пупсиком без роли, то тебе несказанно повезло. Снизу ты видишь список из эмодзи, нажав на которые"
+                        f" , ты щас ахуеешь, **ТЫ ПОЛУЧИШЬ РОЛЬ**. Я знаю, что ты в ахуе {self.get_emoji('kavo')}, поэтому забирай роли быстрее, пока я не передумал!!! \n\n" +
+            f"""{self.get_emoji("peepohappy")} - **Minecraft**
+
+{self.get_emoji("body")} - **CS:GO**
+
+{self.get_emoji("wowcry")} - **Valorant**
+
+{self.get_emoji("sho")} - **Mafia**
+
+{self.get_emoji("peepoban")} - **Dying Light**
+
+{self.get_emoji("angryping")} - **Warzone**
+
+{self.get_emoji("nigger")} - **GTA V**
+
+{self.get_emoji("gomer")} - **Among Us**""",
+            colour=discord.Colour.purple()
+        )
+        message = await ctx.send(embed=embed)
+        await message.add_reaction(self.get_emoji("peepohappy"))
+        await message.add_reaction(self.get_emoji("body"))
+        await message.add_reaction(self.get_emoji("wowcry"))
+        await message.add_reaction(self.get_emoji("sho"))
+        await message.add_reaction(self.get_emoji("peepoban"))
+        await message.add_reaction(self.get_emoji("angryping"))
+        await message.add_reaction(self.get_emoji("nigger"))
+        await message.add_reaction(self.get_emoji("gomer"))
+
+    @commands.has_role("SHOGUNS")
+    @commands.command(name="print_greeting_message")
+    async def greet(self, ctx):
+        embed = discord.Embed(
+            title="ДОБРО ПОЖАЛОВАТЬ В INVINCIBLE WARRIORS",
+            description=f"**Wassup samurai!** Приветствуем тебя на великолемном сервере {self.get_emoji('bulka')}\nЗдесь ты найдешь все что необходимо: **друзей, общение и голые сиськи** "
+                        f"{self.get_emoji('giggle')}\n\nПо всем интересующим тебя вопросам ты можешь обращаться к {discord.utils.get(ctx.guild.roles, name='SHOGUNS').mention} или к пожилому "
+                        f"{self.bot.get_user(414105456907386886).mention}\n\nОбщая информация сервера:",
+            colour=discord.Colour.purple()
+        )
+        embed.add_field(
+            name="Уведомления стримов",
+            value=f"{self.bot.get_channel(783744382569676850).mention} Здесь будут отображаться активные трансляции элиты сервера",
+            inline=False
+        )
+        embed.add_field(
+            name="Уведомления сервера",
+            value=f"{self.bot.get_channel(783721528532926494).mention} Важная инфа о событиях на сервере",
+            inline=False
+        )
+        embed.add_field(
+            name="Click to role",
+            value=f"{self.bot.get_channel(783744626338037850).mention} Канал для получения необходимой роли",
+            inline=False
+        )
+        embed.add_field(
+            name="Главная зона для общения",
+            value=f"{self.bot.get_channel(690640059015102485).mention} Канал для получения необходимой роли",
+            inline=False
+        )
+        embed.add_field(
+            name="Инфа обо мне",
+            value=f"Я - старичок {self.bot.user.mention}. Умею делать все и даже больше. Введи .help, чтобы узнать, что я умею"
+        )
+        await ctx.send(embed=embed)
+
