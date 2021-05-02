@@ -121,7 +121,7 @@ class DeepTranslator(commands.Cog):
                                        'zu': 'zulu'}
 
     @commands.command(name=commands_names["translator"]["help"])
-    async def translator_help(self):
+    async def translator_help(self, ctx):
         embed = discord.Embed(
             title="Помощь по модулю translator",
             description=":u6307: :left_right_arrow: :regional_indicator_a:",

@@ -4,8 +4,11 @@ commands_names = {
     },
     "birthdays": {
         "help": "bd_help",
-        "show birthdays": "bd_show",
-        "add birthday": "bd"
+        "add": "bd_add",
+        "up": "bd_update",
+        "delete": "bd_delete",
+        "show bd": "bd",
+        "show bds": "bd_show"
     },
     "translator": {
         "help": "tr_help",
@@ -44,5 +47,14 @@ commands_names = {
         "init game": "xo",
         "place": "xo_place",
         "lose": "xo_lose"
+    },
+    "level": {
+        "help": "level_help",
+        "add": "level_add",
+        "up": "level_update",
+        "delete": "level_delete",
+        "show levels": "level_show",
+        "show level": "level",
+        "dashboard": "level_dashboard"
     }
 }

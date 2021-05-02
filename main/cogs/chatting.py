@@ -68,11 +68,12 @@ class Chatting(commands.Cog):
             title=f"SAMURAI",
             description="Я пиздатый, на хуйню я слил зарплату. Братик я заменю тебе мать и отца блять, я умею все. Какой-нибудь пидорас обижает, пиши мне - разобьем ему ебало. Можешь играть через "
                         f"меня в игры с друзьями (если есть {self.get_emoji('kavo')}). Могу тебе на шарманочке поиграть, монетку подкинуть или судьбу рассказать. Хочешь перевести что-нибудь, "
-                        f"или определить, что за язык, пиши мне ебана, все расскажу. Как ты понял я бля ахуенный, вот список комманд.",
+                        f"или определить, что за язык, пиши мне ебана, все расскажу. Тебе нужна система уровней и модерация на сервере, ебать есть я. Хочешь чтобы твои друзья знали когда у кого "
+                        f"день рождения, ебать да я создам отдельную базу данных для тебя. Как ты понял я бля ахуенный, вот список комманд.",
             colour=discord.Colour.purple()
         )
         embed.set_footer(text="Say your prayers, Moron!")
-        embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/783747422898880533/832654922952474674/20200121_182041.jpg")
+        embed.set_thumbnail(url=ctx.guild.icon_url)
         embed.set_image(url="https://cdn.discordapp.com/attachments/783747422898880533/828266665602580500/ghostrunner-review.jpg")
         embed.add_field(
             name="Воспроизведение музыки :track_previous: :stop_button: :play_pause:",
@@ -115,21 +116,35 @@ class Chatting(commands.Cog):
         embed.add_field(
             name=f"Дни рождения {self.get_emoji('wowcry')}",
             value=f"""Я, в отличии от друзей, всегда поздравлю тебя в тот самый день
-**{prefix}{commands_names["birthdays"]["help"]}** - выведу тебе отдельную помощь по дням рождениям
-**{prefix}{commands_names["birthdays"]["add birthday"]} <month> <day>** - для пользователей с высокой ролью есть возможность получить поздравления от меня, используя эту команду
-**{prefix}{commands_names["birthdays"]["show birthdays"]}** - выводит список дней рождений юзеров""",
+**{prefix}{commands_names["birthdays"]["help"]}** - поможет тебе понять как устроен модуль Birthdays.
+**{prefix}{commands_names["birthdays"]["add"]} <year> <month> <day>** - внос в базу данных с указанием года, месяца и дня.
+**{prefix}{commands_names["birthdays"]["up"]} <year> <month> <day>** - обновит текущую дату.
+**{prefix}{commands_names["birthdays"]["delete"]}** - удалит данные из базы.
+**{prefix}{commands_names["birthdays"]["show bd"]}** - выведет эмбед о вас.
+**{prefix}{commands_names["birthdays"]["show bds"]}** - выводит список всех дней рождений сервера.""",
             inline=False
         )
         embed.add_field(
             name=f"{self.get_emoji('reeee')} Модуль переводчик {self.get_emoji('thinksmart1')}",
             value=f"""Я смогу перевести все что ты захочешь с любого на любой язык, определить язык тоже не проблема. Также можем поиграть в игру угадай язык.
 **{prefix}{commands_names["translator"]["help"]}** - помогу тебе отдельным эмбедом со всеми командами
-**{prefix}{commands_names["translator"]["list of languages"]}** - в следующих командах и играх ты должен будешь вводить язык и для упрощения я введ систему кратких обозначений, эта команда выведет их
+**{prefix}{commands_names["translator"]["list of languages"]}** - в следующих командах и играх ты должен будешь вводить язык и для упрощения я ввел систему кратких обозначений, эта команда выведет их
 **{prefix}{commands_names["translator"]["translate"]} <source lang> <target lang> <message>** - переведу фразу с исходного языка на итоговый
 **{prefix}{commands_names["translator"]["translate"]} <target lang> <message>** - сам определю исходный язык и переведу тебе все на указанный язык (иногда могу ошибаться, тогда юзай команду выше)
 **{prefix}{commands_names["translator"]["detect language"]} <message>** - выведу тебе язык исходного сообщения
 **{prefix}{commands_names["translator"]["game detect languages"]}** - начну игру "угадай язык" и буду ждать твоего ответа""",
             inline=False
+        )
+        embed.add_field(
+            name="Система уровней :bar_chart:",
+            value=f"""Модуль, созданный для создания классового неравенста на сервере, повышения активности в чатах и конкурентности.
+**{prefix}{commands_names["level"]["help"]}** - поможет тебе понять как устроен модуль LevelSystem.
+**{prefix}{commands_names["level"]["add"]} <role> <xp>** - внос в базу данных с указанием роли и количество опыта для ее получения.
+**{prefix}{commands_names["level"]["up"]} <role> <xp>** - обновит данную роль.
+**{prefix}{commands_names["level"]["delete"]}** - удалит роль из базы данных.
+**{prefix}{commands_names["level"]["show levels"]}** - выведет список всех уровней сервера и количество опыта для их получения.
+**{prefix}{commands_names["level"]["show level"]}** - выведет эмбед о вашем уровне.
+**{prefix}{commands_names["level"]["dashboard"]}** - выведет топ участников сервера."""
         )
         embed.add_field(
             name=f"Прочие команды {self.get_emoji('peepoban')}",
@@ -205,14 +220,14 @@ class Chatting(commands.Cog):
             await message.channel.send("согласен")
             await message.channel.send(self.get_emoji("ahuet"))
 
-    @commands.has_role("SHOGUNS")
+    @commands.has_permissions(administrator=True)
     @commands.command(name="print_click_to_role")
     async def test(self, ctx):
         embed = discord.Embed(
             title="Click to role",
             description=f"**Wassup mate**{self.get_emoji('hattip')}! Если ты не хочешь остаться голым пупсиком без роли, то тебе несказанно повезло. Снизу ты видишь список из эмодзи, нажав на которые"
                         f" , ты щас ахуеешь, **ТЫ ПОЛУЧИШЬ РОЛЬ**. Я знаю, что ты в ахуе {self.get_emoji('kavo')}, поэтому забирай роли быстрее, пока я не передумал!!! \n\n" +
-            f"""{self.get_emoji("peepohappy")} - **Minecraft**
+                        f"""{self.get_emoji("peepohappy")} - **Minecraft**
 
 {self.get_emoji("body")} - **CS:GO**
 
@@ -239,7 +254,7 @@ class Chatting(commands.Cog):
         await message.add_reaction(self.get_emoji("nigger"))
         await message.add_reaction(self.get_emoji("gomer"))
 
-    @commands.has_role("SHOGUNS")
+    @commands.has_permissions(administrator=True)
     @commands.command(name="print_greeting_message")
     async def greet(self, ctx):
         embed = discord.Embed(
@@ -274,4 +289,3 @@ class Chatting(commands.Cog):
             value=f"Я - старичок {self.bot.user.mention}. Умею делать все и даже больше. Введи .help, чтобы узнать, что я умею"
         )
         await ctx.send(embed=embed)
-
