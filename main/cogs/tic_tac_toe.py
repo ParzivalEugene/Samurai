@@ -197,7 +197,7 @@ class TicTacToe(commands.Cog):
             ]))
         self.game_over = True
         embed = discord.Embed(
-            title=f"{self.turn.mention} сдался:exclamation:",
+            title=f"{self.turn.name} сдался:exclamation:",
             colour=discord.Colour.purple()
         )
         await ctx.send(embed=embed)
@@ -205,7 +205,7 @@ class TicTacToe(commands.Cog):
     async def print_game_over(self, ctx):
         if self.game_over:
             embed = discord.Embed(
-                title=f"Победа {self.turn.mention} {self.icons[self.mark]}:exclamation:",
+                title=f"Победа {self.turn.name} {self.icons[self.mark]}:exclamation:",
                 colour=discord.Colour.purple()
             )
             await ctx.send(embed=embed)

@@ -117,6 +117,10 @@ class Chatting(commands.Cog):
             name=f"Дни рождения {self.get_emoji('wowcry')}",
             value=f"""Я, в отличии от друзей, всегда поздравлю тебя в тот самый день
 **{prefix}{commands_names["birthdays"]["help"]}** - поможет тебе понять как устроен модуль Birthdays.
+**{prefix}{commands_names["birthdays"]["set chat"]} <chat>** - указание чата, куда будут прилетать мои поздравления.
+**{prefix}{commands_names["birthdays"]["up chat"]} <chat>** - обновление чата для поздравлений.
+**{prefix}{commands_names["birthdays"]["del chat"]}** - удаления чата для поздравлений, **вы не будете получать мои поздравления**.
+**{prefix}{commands_names["birthdays"]["show chat"]}** - вывод чата, куда будут поступать поздравления.
 **{prefix}{commands_names["birthdays"]["add"]} <year> <month> <day>** - внос в базу данных с указанием года, месяца и дня.
 **{prefix}{commands_names["birthdays"]["up"]} <year> <month> <day>** - обновит текущую дату.
 **{prefix}{commands_names["birthdays"]["delete"]}** - удалит данные из базы.

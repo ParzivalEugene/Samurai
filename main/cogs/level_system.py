@@ -13,7 +13,7 @@ class LevelSystem(commands.Cog):
 
     @commands.Cog.listener("on_message")
     async def check_level_up(self, message):
-        if message.author == self.bot.user:
+        if message.author.bot:
             return
         user_id = message.author.id
         user = message.author
@@ -21,39 +21,61 @@ class LevelSystem(commands.Cog):
         guild = message.guild
         conn = sqlite3.connect(os.path.abspath("database/samurai.db"))
         cursor = conn.cursor()
+
         check_user_id = cursor.execute("SELECT id FROM user WHERE user_id = ?", (user_id,)).fetchone()
+        check_user_id = check_user_id[0] if isinstance(check_user_id, tuple) else check_user_id
         if not check_user_id:
             cursor.execute("INSERT INTO user(user_id) VALUES(?)", (user_id,))
-        check_xp = cursor.execute("SELECT xp FROM user_levels WHERE id = (SELECT id FROM user WHERE user_id = ?)", (user_id,)).fetchone()
-        if not check_xp:
-            cursor.execute("INSERT INTO user_levels(id,xp) VALUES((SELECT id FROM user WHERE user_id = ?),?)", (user_id, 0))
-        xp = cursor.execute("SELECT xp FROM user_levels WHERE id = (SELECT id FROM user WHERE user_id = ?)", (user_id,)).fetchone()[0]
-        cursor.execute("UPDATE user_levels SET xp = ? WHERE id = (SELECT id FROM user WHERE user_id = ?)", (xp + 1, user_id))
+        db_user_id = cursor.execute("SELECT id FROM user WHERE user_id = ?", (user_id,)).fetchone()
+        db_user_id = db_user_id[0] if isinstance(db_user_id, tuple) else db_user_id
         check_server = cursor.execute("SELECT id FROM server WHERE server_id = ?", (guild_id,)).fetchone()
+        check_server = check_server[0] if isinstance(check_server, tuple) else check_server
         if not check_server:
             cursor.execute("INSERT INTO server(server_id) VALUES(?)", (guild_id,))
-        server = cursor.execute("SELECT id FROM server WHERE server_id = ?", (guild_id,)).fetchone()[0]
+        db_server_id = cursor.execute("SELECT id FROM server WHERE server_id = ?", (guild_id,)).fetchone()
+        db_server_id = db_server_id[0] if isinstance(db_server_id, tuple) else db_server_id
+        if not cursor.execute("SELECT id FROM connect WHERE server_id = ? and user_id = ?", (db_server_id, db_user_id)).fetchall():
+            cursor.execute("INSERT INTO connect(server_id,user_id) VALUES(?,?)", (db_server_id, db_user_id))
+
+        check_xp = cursor.execute("SELECT xp FROM user_levels WHERE user_id = ? and server_id = ?", (db_user_id, db_server_id)).fetchone()
+        check_xp = check_xp[0] if isinstance(check_xp, tuple) else check_xp
+        if not check_xp:
+            cursor.execute("INSERT INTO user_levels(user_id,server_id,xp) VALUES(?,?,?)", (db_user_id, db_server_id, 0))
+        xp = cursor.execute("SELECT xp FROM user_levels WHERE user_id = ? and server_id = ?", (db_user_id, db_server_id)).fetchone()
+        xp = xp[0] if isinstance(xp, tuple) else xp
+        cursor.execute("UPDATE user_levels SET xp = ? WHERE user_id = ? and server_id = ?", (xp + 1, db_user_id, db_server_id))
+
+        check_level = cursor.execute("SELECT level FROM user_levels WHERE user_id = ? and server_id = ?", (db_user_id, db_server_id)).fetchone()
+        check_level = check_level[0] if isinstance(check_level, tuple) else check_level
+        if not check_level:
+            cursor.execute("UPDATE user_levels SET level = ? WHERE user_id = ? and server_id = ?", (0, db_user_id, db_server_id))
+        level = cursor.execute("SELECT level FROM user_levels WHERE user_id = ? and server_id = ?", (db_user_id, db_server_id)).fetchone()
+        level = level[0] if isinstance(level, tuple) else level
+
         check_levels = cursor.execute("SELECT * FROM levels WHERE id = (SELECT id FROM server WHERE server_id = ?)", (guild_id,)).fetchall()
         if not check_levels:
-            print("здесь нет ролей")
+            conn.commit()
+            conn.close()
             return
+
         xp += 1
-        levels = cursor.execute("SELECT level_id, level_xp FROM levels WHERE id = (SELECT id FROM server WHERE server_id = ?) ORDER BY level_xp DESC", (guild_id,)).fetchall()
-        for level, current_xp in levels:
-            if discord.utils.get(guild.roles, id=level) in user.roles and xp < current_xp:
-                xp = cursor.execute("SELECT level_xp FROM levels WHERE level_id = ?", (level,)).fetchone()[0]
-                cursor.execute("UPDATE user_levels SET level = ?, xp = ?", (level, xp))
-            if xp == current_xp:
-                mention, current_role = message.author.mention, discord.utils.get(guild.roles, id=level).mention
-                await message.channel.send(choice([
+        levels = cursor.execute("SELECT level_id, level_xp FROM levels WHERE id = ? ORDER BY level_xp DESC", (db_server_id,)).fetchall()
+        for db_level, db_xp in levels:
+            if xp < db_xp and discord.utils.get(guild.roles, id=db_level) in user.roles:
+                cursor.execute("UPDATE user_levels SET level = ?, xp = ? WHERE user_id = ? and server_id = ?", (db_level, db_xp + 1, db_user_id, db_server_id))
+                conn.commit()
+                conn.close()
+                return
+            elif xp == db_xp:
+                cursor.execute("UPDATE user_levels SET level = ? WHERE user_id = ? and server_id = ?", (db_level, db_user_id, db_server_id))
+                conn.commit()
+                conn.close()
+                mention, current_role = user.mention, discord.utils.get(guild.roles, id=db_level).mention
+                await user.add_roles(discord.utils.get(guild.roles, id=db_level))
+                return await message.channel.send(choice([
                     f"Поздравляю {mention}, ты заслужил повышение! Текущий уровень {current_role}", f"Пожилой {mention} повысился до {current_role}, мои поздравления!",
                     f"Эль негр {mention} апнулся до {current_role}!!! супер пупер пупсик"
                 ]))
-                cursor.execute("UPDATE user_levels SET level = ?", (level,))
-                break
-        db_server_id, db_user_id = server, cursor.execute("SELECT id FROM user WHERE user_id = ?", (user_id,)).fetchone()[0]
-        if not cursor.execute("SELECT id FROM connect WHERE server_id = ? and user_id = ?", (db_server_id, db_user_id)).fetchall():
-            cursor.execute("INSERT INTO connect(server_id,user_id) VALUES(?,?)", (db_server_id, db_user_id))
         conn.commit()
         conn.close()
 
@@ -84,20 +106,26 @@ class LevelSystem(commands.Cog):
         conn = sqlite3.connect(os.path.abspath("database/samurai.db"))
         cursor = conn.cursor()
         server = cursor.execute("SELECT id FROM server WHERE server_id = ?", (guild_id,)).fetchone()
+        server = server[0] if isinstance(server, tuple) else server
         if not server:
             cursor.execute("INSERT INTO server(server_id) VALUES(?)", (guild_id,))
             server = cursor.execute("SELECT id FROM server WHERE server_id = ?", (guild_id,)).fetchone()
+            server = server[0] if isinstance(server, tuple) else server
         database_role = cursor.execute("SELECT id FROM levels WHERE level_id = ?", (role_id,)).fetchall()
         if database_role:
+            conn.commit()
+            conn.close()
             return await ctx.send(choice([
-                "Внучок, такой уровень", "Старичок, уровень уже есть, юзай команду **.level_update**", "Ебен бобен уже есть такой уровень", "Молодой я тут **добавляю** уровни, а не обновляю"
+                "Старичок, уровень уже есть, юзай команду **.level_update**", "Ебен бобен уже есть такой уровень", "Молодой я тут **добавляю** уровни, а не обновляю"
             ]))
         cursor.execute("INSERT INTO levels(id,level_id,level_xp) VALUES(?,?,?)", (server[0], role_id, level_xp))
         check_name = cursor.execute("SELECT id FROM user WHERE user_id = ?", (user_id,)).fetchone()
+        check_name = check_name[0] if isinstance(check_name, tuple) else check_name
         if not check_name:
             cursor.execute("INSERT INTO user(user_id) VALUES(?)", (user_id,))
             check_name = cursor.execute("SELECT id FROM user WHERE user_id = ?", (user_id,)).fetchone()
-        db_server_id, db_user_id = server[0], check_name[0]
+            check_name = check_name[0] if isinstance(check_name, tuple) else check_name
+        db_server_id, db_user_id = server, check_name
         if not cursor.execute("SELECT id FROM connect WHERE server_id = ? and user_id = ?", (db_server_id, db_user_id)).fetchall():
             cursor.execute("INSERT INTO connect(server_id,user_id) VALUES(?,?)", (db_server_id, db_user_id))
         conn.commit()
@@ -130,28 +158,39 @@ class LevelSystem(commands.Cog):
         conn = sqlite3.connect(os.path.abspath("database/samurai.db"))
         cursor = conn.cursor()
         server = cursor.execute("SELECT id FROM server WHERE server_id = ?", (guild_id,)).fetchone()
+        server = server[0] if isinstance(server, tuple) else server
         if not server:
             cursor.execute("INSERT INTO server(server_id) VALUES(?)", (guild_id,))
+            conn.commit()
+            conn.close()
             return await ctx.send(choice([
                 "Пожилой я блять еще даже твой сервер в базу не внес, а ты команды апать просишь", "Дедуля блять я еще про этот сервер нихуя не знаю, не то что про команды"
             ]))
         database_role = cursor.execute("SELECT id FROM levels WHERE level_id = ?", (role_id,)).fetchone()
+        database_role = database_role[0] if isinstance(database_role, tuple) else database_role
         if not database_role:
+            conn.commit()
+            conn.close()
             return await ctx.send(choice([
                 "Внучок таких ролей еще нет", "Пожилой мне нехуй апдейтить, еще нет такого уровня", "Бля сынок первый раз вижу этот уровень, юзай **.level_add**"
             ]))
-        current_xp = cursor.execute("SELECT level_xp FROM levels WHERE level_id = ?", (role_id,)).fetchone()[0]
+        current_xp = cursor.execute("SELECT level_xp FROM levels WHERE level_id = ?", (role_id,)).fetchone()
+        current_xp = current_xp[0] if isinstance(current_xp, tuple) else current_xp
         if current_xp == level_xp:
+            conn.commit()
+            conn.close()
             return await ctx.send(choice([
                 f"Внучок, у этого уровня {role.mention} и так такое же количество опыта", f"Чтобы получить этот уровень {role.mention} нужно такое же количество опыта, в чем апдейт",
                 "А в чем апдейт то, данные те же"
             ]))
         cursor.execute("UPDATE levels SET level_xp = ? WHERE level_id = ?", (level_xp, role_id))
         check_name = cursor.execute("SELECT id FROM user WHERE user_id = ?", (user_id,)).fetchone()
+        check_name = check_name[0] if isinstance(check_name, tuple) else check_name
         if not check_name:
             cursor.execute("INSERT INTO user(user_id) VALUES(?)", (user_id,))
             check_name = cursor.execute("SELECT id FROM user WHERE user_id = ?", (user_id,)).fetchone()
-        db_server_id, db_user_id = server[0], check_name[0]
+            check_name = check_name[0] if isinstance(check_name, tuple) else check_name
+        db_server_id, db_user_id = server, check_name
         if not cursor.execute("SELECT id FROM connect WHERE server_id = ? and user_id = ?", (db_server_id, db_user_id)).fetchall():
             cursor.execute("INSERT INTO connect(server_id,user_id) VALUES(?,?)", (db_server_id, db_user_id))
         conn.commit()
@@ -184,22 +223,30 @@ class LevelSystem(commands.Cog):
         conn = sqlite3.connect(os.path.abspath("database/samurai.db"))
         cursor = conn.cursor()
         server = cursor.execute("SELECT id FROM server WHERE server_id = ?", (guild_id,)).fetchone()
+        server = server[0] if isinstance(server, tuple) else server
         if not server:
             cursor.execute("INSERT INTO server(server_id) VALUES(?)", (guild_id,))
+            conn.commit()
+            conn.close()
             return await ctx.send(choice([
                 "Пожилой я блять еще даже твой сервер в базу не внес, а ты команды апать просишь", "Дедуля блять я еще про этот сервер нихуя не знаю, не то что про команды"
             ]))
         database_role = cursor.execute("SELECT id FROM levels WHERE level_id = ?", (role_id,)).fetchone()
+        check_name = server[0] if isinstance(server, tuple) else server
         if not database_role:
+            conn.commit()
+            conn.close()
             return await ctx.send(choice([
                 "Внучок таких ролей еще нет", "Пожилой мне нехуй удалять, еще нет такого уровня", f"Бля сынок первый раз вижу этот уровень, юзай **.{commands_names['level']['add']}**"
             ]))
         cursor.execute("DELETE FROM levels WHERE level_id = ?", (role_id,))
         check_name = cursor.execute("SELECT id FROM user WHERE user_id = ?", (user_id,)).fetchone()
+        check_name = check_name[0] if isinstance(check_name, tuple) else check_name
         if not check_name:
             cursor.execute("INSERT INTO user(user_id) VALUES(?)", (user_id,))
             check_name = cursor.execute("SELECT id FROM user WHERE user_id = ?", (user_id,)).fetchone()
-        db_server_id, db_user_id = server[0], check_name[0]
+            check_name = check_name[0] if isinstance(check_name, tuple) else check_name
+        db_server_id, db_user_id = server, check_name
         if not cursor.execute("SELECT id FROM connect WHERE server_id = ? and user_id = ?", (db_server_id, db_user_id)).fetchall():
             cursor.execute("INSERT INTO connect(server_id,user_id) VALUES(?,?)", (db_server_id, db_user_id))
         conn.commit()
@@ -234,15 +281,18 @@ class LevelSystem(commands.Cog):
         conn = sqlite3.connect(os.path.abspath("database/samurai.db"))
         cursor = conn.cursor()
         levels = cursor.execute("SELECT level_id, level_xp FROM levels WHERE id = (SELECT id FROM server WHERE server_id = ?) ORDER BY level_xp DESC", (guild_id,)).fetchall()
-        data = ""
-        for line in levels:
-            role = discord.utils.get(guild.roles, id=line[0])
-            xp = line[1]
-            data += f"\n**{role.mention}** - необходимо для получения: {xp} xp"
+        if not levels:
+            data = "Информации пока нет("
+        else:
+            data = "Информация об уровнях сервера и количества опыта для их получения"
+            for line in levels:
+                role = discord.utils.get(guild.roles, id=line[0])
+                xp = line[1]
+                data += f"\n**{role.mention}** - необходимо для получения: {xp} xp"
+            data += "\n**1 xp = 1 сообщение**"
         embed = discord.Embed(
             title="Уровни на сервере",
-            description="Информация об уровнях сервера и количества опыта для их получения" + data +
-            "\n**1 xp = 1 сообщение**",
+            description=data,
             colour=discord.Colour.purple()
         )
         await ctx.send(embed=embed)
@@ -258,33 +308,30 @@ class LevelSystem(commands.Cog):
 
         # -----------------------------------Check-info----------------------------------------------
         db_user_id = cursor.execute("SELECT id FROM user WHERE user_id = ?", (user_id,)).fetchone()
+        db_user_id = db_user_id[0] if isinstance(db_user_id, tuple) else db_user_id
         if not db_user_id:
             cursor.execute("INSERT INTO user(user_id) VALUES(?)", (user_id,))
+            conn.commit()
+            conn.close()
             return await ctx.send(choice([
                 "Сынок я тебя первый раз вижу, какой лвл", "Внучок о тебе информации в базе данных нет", "Сынок я тебя не знаю, а лвл уж точно"
             ]))
-        if isinstance(db_user_id, tuple):
-            db_user_id = db_user_id[0]
         db_server_id = cursor.execute("SELECT id FROM server WHERE server_id = ?", (guild_id,)).fetchone()
+        db_server_id = db_server_id[0] if isinstance(db_server_id, tuple) else db_server_id
         if not db_server_id:
             cursor.execute("INSERT INTO server(server_id) VALUES(?)", (guild_id,))
+            conn.commit()
+            conn.close()
             return await ctx.send(choice([
                 "Пожилой я на этом сервере еще не освоился, поэтому о ролях ничего не знаю", "В моей базе данных отсутствует инфа о лвлах этого сервера", "Внучок в душе не ебу какие здесь лвла"
             ]))
-        if isinstance(db_server_id, tuple):
-            db_server_id = db_server_id[0]
-        info = cursor.execute("SELECT level, xp FROM user_levels WHERE id = ?", (db_user_id,)).fetchone()
-        if not info:
-            return await ctx.send(choice([
-                "Сынок у меня по твоим уровням нет инфы, прояви активность на сервере", "Внучок пока по твоему лвлу нет инфы", "Сынок в душе не ебу какой у тебя лвл"
-            ]))
-        # -------------------------------------------------------------------------------------------
 
-        level, xp = info
+        level, xp = cursor.execute("SELECT level, xp FROM user_levels WHERE user_id = ? and server_id = ?", (db_user_id, db_server_id)).fetchone()
+        current_level = discord.utils.get(guild.roles, id=level)
         embed = discord.Embed(
             title=f"{user.name} - DASHBOARD",
             description=f"""{choice(["Пуси цунами от этой зайки!!!", "Он пиздатый, ахуенный, самый первый, не въебенный!", "Супер экстра пупсик!"])} {user.mention}
-**level - {discord.utils.get(guild.roles, id=level).mention}**
+**level - {current_level.mention if current_level else current_level}**
 **xp - {xp}**""",
             colour=discord.Colour.purple()
         )
@@ -306,24 +353,33 @@ class LevelSystem(commands.Cog):
 
         # -----------------------------------Check-info----------------------------------------------
         check_user = cursor.execute("SELECT id FROM user WHERE user_id = ?", (user_id,)).fetchone()
+        check_user = check_user[0] if isinstance(check_user, tuple) else check_user
         if not check_user:
             cursor.execute("INSERT INTO user(user_id) VALUES(?)", (user_id,))
         check_server = cursor.execute("SELECT id FROM server WHERE server_id = ?", (guild_id,)).fetchone()
+        check_server = check_server[0] if isinstance(check_server, tuple) else check_server
         if not check_server:
             cursor.execute("INSERT INTO server(server_id) VALUES(?)", (guild_id,))
+            conn.commit()
+            conn.close()
             return await ctx.send(choice([
                 "Сынок у меня пока вообще нет инфы об этом сервере", "Внучок я пока об этом сервере ничего не знаю", "Пожилой, пока ноль инфы об этом сервере"
             ]))
         check_users = cursor.execute("SELECT user_id FROM connect WHERE server_id = (SELECT id FROM server WHERE server_id = ?)", (guild_id,)).fetchall()
         if not check_users:
+            conn.commit()
+            conn.close()
             return await ctx.send(choice([
                 "Я пока не получил ни одного сообщения на сервере", "Пока ноль инфы об уровнях участников", "Еще не получил ни одного сообщения", "0 инфы о вас ребятки"
             ]))
+        db_server_id, db_user_id = check_server, check_user
+        if not cursor.execute("SELECT id FROM connect WHERE server_id = ? and user_id = ?", (db_server_id, db_user_id)).fetchall():
+            cursor.execute("INSERT INTO connect(server_id,user_id) VALUES(?,?)", (db_server_id, db_user_id))
         # -------------------------------------------------------------------------------------------
 
         check_users = [i[0] for i in check_users]
         users = cursor.execute(f"SELECT user_id FROM user WHERE id IN ({','.join(['?'] * len(check_users))})", check_users).fetchall()
-        levels = cursor.execute(f"SELECT level, xp FROM user_levels WHERE id IN ({','.join(['?'] * len(check_users))})", check_users).fetchall()
+        levels = cursor.execute(f"SELECT level, xp FROM user_levels WHERE user_id IN ({','.join(['?'] * len(check_users))}) and server_id = ?", check_users + [db_server_id]).fetchall()
         info = []
         for i in range(len(check_users)):
             info.append(users[i] + levels[i])
@@ -344,16 +400,16 @@ class LevelSystem(commands.Cog):
             cur_xp = info[i][2]
             embed.add_field(
                 name=f"{i + 1}. {cur_user.name}",
-                value=f"{phrases_three_winners[i + 1]} {cur_user.mention}\n**level: {cur_level if not cur_level else cur_level.mention}\nxp: {cur_xp}**",
+                value=f"{phrases_three_winners[i + 1]} {cur_user.mention}\n**level: {str(cur_level) if not cur_level else cur_level.mention}\nxp: {cur_xp}**",
                 inline=False
             )
-        info = info[:max(-3, -len(info))]
+        info = info[min(3, len(info)):]
         output = []
         for num, line in enumerate(info):
             cur_user = discord.utils.get(guild.members, id=line[0])
             cur_level = discord.utils.get(guild.roles, id=line[1])
             cur_xp = line[2]
-            output.append(f"**{num + 4}.{cur_user.mention}** - {' '.join([cur_level if not cur_level else cur_level.mention, f'**{cur_xp} xp**'])}")
+            output.append(f"**{num + 4}.{cur_user.mention if cur_user else str(cur_user)}** - {' '.join([str(cur_level) if not cur_level else cur_level.mention, f'**{cur_xp} xp**'])}")
         if output:
             embed.add_field(
                 name=choice([
@@ -362,11 +418,6 @@ class LevelSystem(commands.Cog):
                 value="\n".join(output),
                 inline=False
             )
-
-        db_server_id = check_server[0] if isinstance(check_server, tuple) else check_server
-        db_user_id = check_user[0] if isinstance(check_user, tuple) else check_user
-        if not cursor.execute("SELECT id FROM connect WHERE server_id = ? and user_id = ?", (db_server_id, db_user_id)).fetchall():
-            cursor.execute("INSERT INTO connect(server_id,user_id) VALUES(?,?)", (db_server_id, db_user_id))
         conn.commit()
         conn.close()
         await ctx.send(embed=embed)

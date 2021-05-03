@@ -4,6 +4,10 @@ commands_names = {
     },
     "birthdays": {
         "help": "bd_help",
+        "set chat": "bd_set_chat",
+        "up chat": "bd_up_chat",
+        "del chat": "bd_del_chat",
+        "show chat": "bd_show_chat",
         "add": "bd_add",
         "up": "bd_update",
         "delete": "bd_delete",
