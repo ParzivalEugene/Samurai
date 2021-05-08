@@ -10,7 +10,9 @@ from cogs.music_player import Player
 from cogs.translator import DeepTranslator
 from cogs.click_to_roles import ClickToRoles
 from cogs.level_system import LevelSystem
+from cogs.wiki_pedia import Wikipedia
 from keep_alive import keep_alive
+
 
 bot = commands.Bot(command_prefix=prefix, help_command=None, intents=discord.Intents.all())
 
@@ -33,6 +35,7 @@ bot.add_cog(TicTacToe(bot))
 bot.add_cog(Player(bot))
 bot.add_cog(DeepTranslator(bot))
 bot.add_cog(ClickToRoles(bot))
+bot.add_cog(Wikipedia(bot))
 bot.add_cog(LevelSystem(bot))
 keep_alive()
 bot.run(token_for_bot)

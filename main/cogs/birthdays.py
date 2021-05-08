@@ -302,11 +302,15 @@ class Birthdays(commands.Cog):
         check_date = cursor.execute("SELECT date FROM birthdays WHERE id = ?", (db_user_id,)).fetchone()
         check_date = check_date[0] if isinstance(check_date, tuple) else check_date
         if check_date:
+            conn.commit()
+            conn.close()
             return await ctx.send(choice([
                 f"Внучок, твоя дата уже есть, юзай **{commands_names['birthdays']['up']}**", f"Молодой, ты уже есть в базе, юзай **{commands_names['birthdays']['up']}**",
                 f"Старичок, ты уже вносил данные, юзай **{commands_names['birthdays']['up']}** или **{commands_names['birthdays']['delete']}**", "Внучок, по тебе уже есть инфа"
             ]))
         if not (0 < year < 2020 and 0 < month < 13 and 0 < day < 32):
+            conn.commit()
+            conn.close()
             return await ctx.send(choice([
                 "Внучок, не обманывай старого, неверный ввод", "Молодежь над дедом издевается, неправильный ввод", "Сынок, неправильно данные ввел", "Внучок, ты не мог тогда родиться"
             ]))
@@ -363,6 +367,8 @@ class Birthdays(commands.Cog):
                 f"Внучок, по тебе еще нет есть инфы, обновлять нечего {discord.utils.get(self.bot.emojis, name='ahuet')}"
             ]))
         if not (0 < year < 2020 and 0 < month < 13 and 0 < day < 32):
+            conn.commit()
+            conn.close()
             return await ctx.send(choice([
                 "Внучок, не обманывай старого, неверный ввод", "Молодежь над дедом издевается, неправильный ввод", "Сынок, неправильно данные ввел", "Внучок, ты не мог тогда родиться"
             ]))
@@ -371,6 +377,8 @@ class Birthdays(commands.Cog):
         current_date = current_date[0] if isinstance(current_date, tuple) else current_date
         user_date = date(year, month, day).isoformat()
         if current_date == user_date:
+            conn.commit()
+            conn.close()
             return await ctx.send(choice([
                 "Внучок, ты ввел те же данные, что у меня есть", "Апдейт ничем не отличается от текущих данных", "У меня в базе такие же данные",
                 "Апдейта не будет, он принял ислам. Внучок, данные те же что и в базе"
@@ -419,6 +427,8 @@ class Birthdays(commands.Cog):
         check_date = cursor.execute("SELECT date FROM birthdays WHERE id = ?", (db_user_id,)).fetchone()
         check_date = check_date[0] if isinstance(check_date, tuple) else check_date
         if not check_date:
+            conn.commit()
+            conn.close()
             return await ctx.send(choice([
                 f"Внучок, твоей даты еще нет, юзай **{commands_names['birthdays']['add']}**", f"Молодой, тебя еще нет в базе, юзай **{commands_names['birthdays']['add']}**",
                 f"Старичок, ты еще не вносил данные, юзай **{commands_names['birthdays']['add']}**",
@@ -459,6 +469,8 @@ class Birthdays(commands.Cog):
         check_date = cursor.execute("SELECT date FROM birthdays WHERE id = ?", (db_user_id,)).fetchone()
         check_date = check_date[0] if isinstance(check_date, tuple) else check_date
         if not check_date:
+            conn.commit()
+            conn.close()
             return await ctx.send(choice([
                 f"Внучок, твоей даты еще нет, юзай **{commands_names['birthdays']['add']}**", f"Молодой, тебя еще нет в базе, юзай **{commands_names['birthdays']['add']}**",
                 f"Старичок, ты еще не вносил данные, юзай **{commands_names['birthdays']['add']}**",

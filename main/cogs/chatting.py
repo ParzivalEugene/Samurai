@@ -39,19 +39,26 @@ class Chatting(commands.Cog):
         embed.set_footer(text="")
         return embed
 
+    def embed_meme(self, author):
+        response = requests.get("https://some-random-api.ml/meme").json()
+        url = response["image"]
+        embed = discord.Embed(
+            title=f"MEME {self.get_emoji('bulka')}",
+            description=f"Мем, специально для {author.mention}",
+            colour=discord.Colour.purple()
+        )
+        embed.set_image(url=url)
+        return embed
+
     @staticmethod
     def embed_dog(author):
         """Return the embed with random doggy"""
         allowed_extension = ['jpg', 'jpeg', 'png']
         file_extension, url = '', ''
         while file_extension not in allowed_extension:
-            contents = requests.get('https://random.dog/woof.json').json()
-            url = contents['url']
+            contents = requests.get('https://some-random-api.ml/img/dog').json()
+            url = contents['link']
             file_extension = re.search("([^.]*)$", url).group(1).lower()
-
-        # url = "https://dog.ceo/api/breeds/image/random"
-        # response = requests.get(url=url).json()
-        # data = response["message"]
         data = url
         embed = discord.Embed(
             title="Пёсик :smiling_face_with_3_hearts:",
@@ -199,6 +206,8 @@ class Chatting(commands.Cog):
             await message.channel.send(embed=self.embed_cat(message.author))
         elif any(msg.startswith(i) for i in ("пес", "соба", "dog", "woof")):
             await message.channel.send(embed=self.embed_dog(message.author))
+        elif any(msg.startswith(i) for i in ("meme", "мем", "мемчик", "мемас")):
+            await message.channel.send(embed=self.embed_meme(message.author))
 
         """Reacting on basic phrases -------------------------------------------------------------"""
 
