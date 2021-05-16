@@ -5,6 +5,11 @@ from cogs.commands import commands_names
 from random import choice
 
 
+"""
+------------------------------------------------------------------------------------THIS CODE WILL BE REWRITTEN SOON------------------------------------------------------------------------------------
+"""
+
+
 class ConnectFour(commands.Cog):
     def __init__(self, bot):
         self.bot = bot

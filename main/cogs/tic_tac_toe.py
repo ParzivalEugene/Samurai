@@ -5,6 +5,11 @@ from cogs.commands import commands_names
 from cogs.config import *
 
 
+"""
+------------------------------------------------------------------------------------THIS CODE WILL BE REWRITTEN SOON------------------------------------------------------------------------------------
+"""
+
+
 class TicTacToe(commands.Cog):
     def __init__(self, bot):
         self.bot = bot

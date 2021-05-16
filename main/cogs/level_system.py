@@ -7,6 +7,11 @@ from random import choice
 import os
 
 
+"""
+------------------------------------------------------------------------------SOON I WILL SWITCH FROM SQLITE TO POSTGRESQL------------------------------------------------------------------------------
+"""
+
+
 class LevelSystem(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
