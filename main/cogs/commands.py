@@ -55,8 +55,8 @@ commands_names = {
     "level": {
         "help": "level_help",
         "add": "level_add",
-        "up": "level_update",
-        "delete": "level_delete",
+        "up": "level_up",
+        "delete": "level_del",
         "show levels": "level_show",
         "show level": "level",
         "dashboard": "level_dashboard"

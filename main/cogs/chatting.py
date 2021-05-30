@@ -27,7 +27,6 @@ class Chatting(commands.Cog):
 
     @staticmethod
     def embed_cat(author):
-        """Return the embed with random kitty"""
         response = requests.get("https://aws.random.cat/meow")
         data = response.json()
         embed = discord.Embed(
@@ -148,7 +147,7 @@ class Chatting(commands.Cog):
         )
         embed.add_field(
             name="Система уровней :bar_chart:",
-            value=f"""Модуль, созданный для создания классового неравенста на сервере, повышения активности в чатах и конкурентности.
+            value=f"""Модуль, созданный для создания классового неравенства на сервере, повышения активности в чатах и конкурентности.
 **{prefix}{commands_names["level"]["help"]}** - поможет тебе понять как устроен модуль LevelSystem.
 **{prefix}{commands_names["level"]["add"]} <role> <xp>** - внос в базу данных с указанием роли и количество опыта для ее получения.
 **{prefix}{commands_names["level"]["up"]} <role> <xp>** - обновит данную роль.
@@ -173,25 +172,6 @@ class Chatting(commands.Cog):
                   "лапочкой, я слежу за тобой, малыш."
         )
         await ctx.send(embed=embed)
-
-    @commands.Cog.listener()
-    async def on_command_error(self, ctx, error):
-        if isinstance(error, commands.CommandNotFound):
-            await ctx.send(choice([
-                "Внучок, я таких команд не знаю", "Боевой это чо за команда", "*\Бип\* - *\Боп\* неизвестная мне команда"
-            ]))
-        if error:
-            raise error
-
-    @commands.Cog.listener()
-    async def on_member_join(self, member):
-        channel = self.bot.get_channel(783742051556655174)  # участники
-        await channel.send(member.mention, "присоединлся к серверу")
-
-    @commands.Cog.listener()
-    async def on_member_remove(self, member):
-        channel = self.bot.get_channel(783742051556655174)  # участники
-        await channel.send(member.mention, "покинул сервер")
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -272,7 +252,7 @@ class Chatting(commands.Cog):
     async def greet(self, ctx):
         embed = discord.Embed(
             title="ДОБРО ПОЖАЛОВАТЬ В INVINCIBLE WARRIORS",
-            description=f"**Wassup samurai!** Приветствуем тебя на великолемном сервере {self.get_emoji('bulka')}\nЗдесь ты найдешь все что необходимо: **друзей, общение и голые сиськи** "
+            description=f"**Wassup samurai!** Приветствуем тебя на великолепном сервере {self.get_emoji('bulka')}\nЗдесь ты найдешь все что необходимо: **друзей, общение и голые сиськи** "
                         f"{self.get_emoji('giggle')}\n\nПо всем интересующим тебя вопросам ты можешь обращаться к {discord.utils.get(ctx.guild.roles, name='SHOGUNS').mention} или к пожилому "
                         f"{self.bot.get_user(414105456907386886).mention}\n\nОбщая информация сервера:",
             colour=discord.Colour.purple()

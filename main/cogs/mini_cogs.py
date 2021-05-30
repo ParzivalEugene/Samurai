@@ -68,7 +68,7 @@ class MiniCogs(commands.Cog):
     async def get_forecast_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(choice([
-                "Молодой я ебу в каком городе ты хочешь узнать прогоз", "Внучок а место то какое", "Сынок а где город то"
+                "Молодой я ебу в каком городе ты хочешь узнать прогноз", "Внучок а место то какое", "Сынок а где город то"
             ]))
         if isinstance(error, commands.BadArgument):
             await ctx.send("Вы неверно указали место")

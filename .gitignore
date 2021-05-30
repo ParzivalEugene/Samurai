@@ -1,11 +1,6 @@
-/main/database/
-/main/keep_alive.py
+/main/database/samurai.db
 /main/cogs/__init__.py
-/demo/
-/main/cogs/utils.py
-/main/cogs/demo/search.py
-/main/cogs/demo/player.py
-/main/cogs/music.py
 /main/cogs/config.py
-/main/test.py
 /main/cogs/test_cog.py
+/main/test.py
+/main/keep_alive.py

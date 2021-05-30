@@ -11,6 +11,7 @@ from cogs.translator import DeepTranslator
 from cogs.click_to_roles import ClickToRoles
 from cogs.level_system import LevelSystem
 from cogs.wiki_pedia import Wikipedia
+from cogs.on_events_checker import OnEventsChecker
 from keep_alive import keep_alive
 
 
@@ -24,7 +25,7 @@ async def on_ready():
         type=discord.ActivityType.listening,
         name=f"{prefix}help - INVINCIBLE WARRIORS")
     )
-    await Birthdays(bot).check_birthday.start()
+    await Birthdays(bot).check_birthdays.start()
 
 
 bot.add_cog(Birthdays(bot))
@@ -37,5 +38,6 @@ bot.add_cog(DeepTranslator(bot))
 bot.add_cog(ClickToRoles(bot))
 bot.add_cog(Wikipedia(bot))
 bot.add_cog(LevelSystem(bot))
+bot.add_cog(OnEventsChecker(bot))
 keep_alive()
 bot.run(token_for_bot)

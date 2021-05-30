@@ -129,8 +129,15 @@ class DeepTranslator(commands.Cog):
         )
         embed.add_field(
             name="Команды",
-            value=f"""{prefix}{commands_names}"""
+            value=f"""Я смогу перевести все что ты захочешь с любого на любой язык, определить язык тоже не проблема. Также можем поиграть в игру угадай язык.
+**{prefix}{commands_names["translator"]["help"]}** - помогу тебе отдельным эмбедом со всеми командами
+**{prefix}{commands_names["translator"]["list of languages"]}** - в следующих командах и играх ты должен будешь вводить язык и для упрощения я ввел систему кратких обозначений, эта команда выведет их
+**{prefix}{commands_names["translator"]["translate"]} <source lang> <target lang> <message>** - переведу фразу с исходного языка на итоговый
+**{prefix}{commands_names["translator"]["translate"]} <target lang> <message>** - сам определю исходный язык и переведу тебе все на указанный язык (иногда могу ошибаться, тогда юзай команду выше)
+**{prefix}{commands_names["translator"]["detect language"]} <message>** - выведу тебе язык исходного сообщения
+**{prefix}{commands_names["translator"]["game detect languages"]}** - начну игру "угадай язык" и буду ждать твоего ответа"""
         )
+        await ctx.send(embed=embed)
 
     @commands.command(name=commands_names["translator"]["translate"])
     async def translate(self, ctx, *words):
@@ -146,7 +153,7 @@ class DeepTranslator(commands.Cog):
                 ]))
             if len(words) == 1:
                 return await ctx.send(choice([
-                    "Ахуенное слово, жалко не ебу на какой язык переводить", "Бля слово топ, только куда сука переводить", "Сука на какой язык то переводить твое слово ебучее"
+                    "Ахуенное слово, жалко не ебу на какой язык переводить", "Бля слово топ, только куда сука переводить", "Сука на какой язык то переводить твоё слово ебучее"
                 ]))
             if len(words) == 2 and all(i in self.google_translator_keys for i in words):
                 return await ctx.send(choice([
