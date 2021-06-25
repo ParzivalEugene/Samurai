@@ -1,49 +1,43 @@
-import discord
-from discord.ext import commands
-from cogs.config import *
-from cogs.commands import commands_names
-from random import choice
-import requests
 import re
+
+import discord
+import requests
+from discord.ext import commands
+
+from cogs.commands import commands_names as cs
+from cogs.glossary import speech_setting, vb, current_language
+
+commands_names = cs.chatting
 
 
 class Chatting(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.phrases = {
-            "insults": [
-                "ботяра пидор", "бот говно", "говно бот", "долбаеб бот", "бот долбаеб", "бот пидор"
-            ],
-            "compliments": ["бот " + i for i in "ахуенный, классный, крутой, заебатый, милый, пиздатый".split(", ")] + [i + " бот" for i in "ахуенный, классный, крутой, заебатый, милый, "
-                                                                                                                                            "пиздатый".split(", ")],
-            "sad": [
-                "грустно", "одиноко", "печально", "горько", "тоскливо", "хуево", "умираю"
-            ]
-        }
 
     def get_emoji(self, name):
-        """Return emoji by name"""
         return discord.utils.get(self.bot.emojis, name=name)
 
     @staticmethod
     def embed_cat(author):
+        vocabulary = speech_setting(author.guild.id).chatting
         response = requests.get("https://aws.random.cat/meow")
         data = response.json()
         embed = discord.Embed(
-            title="Котик :smiling_face_with_3_hearts:",
-            description=f"Прямо как ты {author.mention}",
+            title=vocabulary.embed_cat.title,
+            description=vocabulary.embed_cat.description.format(author.mention),
             colour=discord.Colour.purple()
         )
         embed.set_image(url=data["file"])
-        embed.set_footer(text="")
         return embed
 
-    def embed_meme(self, author):
+    @staticmethod
+    def embed_meme(author):
+        vocabulary = speech_setting(author.guild.id).chatting
         response = requests.get("https://some-random-api.ml/meme").json()
         url = response["image"]
         embed = discord.Embed(
-            title=f"MEME {self.get_emoji('bulka')}",
-            description=f"Мем, специально для {author.mention}",
+            title=vocabulary.embed_meme.title,
+            description=vocabulary.embed_meme.description.format(author.mention),
             colour=discord.Colour.purple()
         )
         embed.set_image(url=url)
@@ -51,7 +45,7 @@ class Chatting(commands.Cog):
 
     @staticmethod
     def embed_dog(author):
-        """Return the embed with random doggy"""
+        vocabulary = speech_setting(author.guild.id).chatting
         allowed_extension = ['jpg', 'jpeg', 'png']
         file_extension, url = '', ''
         while file_extension not in allowed_extension:
@@ -60,158 +54,105 @@ class Chatting(commands.Cog):
             file_extension = re.search("([^.]*)$", url).group(1).lower()
         data = url
         embed = discord.Embed(
-            title="Пёсик :smiling_face_with_3_hearts:",
-            description=f"Прямо как ты {author.mention}",
+            title=vocabulary.embed_dog.title,
+            description=vocabulary.embed_dog.description.format(author.mention),
             colour=discord.Colour.purple()
         )
         embed.set_image(url=data)
-        embed.set_footer(text="")
         return embed
 
-    @commands.command(name=commands_names["chatting"]["help"])
+    @commands.command(name=commands_names.help)
     async def my_help(self, ctx):
+        vocabulary = speech_setting(ctx.guild.id).chatting
         embed = discord.Embed(
-            title=f"SAMURAI",
-            description="Я пиздатый, на хуйню я слил зарплату. Братик я заменю тебе мать и отца блять, я умею все. Какой-нибудь пидорас обижает, пиши мне - разобьем ему ебало. Можешь играть через "
-                        f"меня в игры с друзьями (если есть {self.get_emoji('kavo')}). Могу тебе на шарманочке поиграть, монетку подкинуть или судьбу рассказать. Хочешь перевести что-нибудь, "
-                        f"или определить, что за язык, пиши мне ебана, все расскажу. Тебе нужна система уровней и модерация на сервере, ебать есть я. Хочешь чтобы твои друзья знали когда у кого "
-                        f"день рождения, ебать да я создам отдельную базу данных для тебя. Как ты понял я бля ахуенный, вот список комманд.",
+            title=vocabulary.help.title,
+            description=vocabulary.help.description,
             colour=discord.Colour.purple()
         )
-        embed.set_footer(text="Say your prayers, Moron!")
-        embed.set_thumbnail(url=ctx.guild.icon_url)
-        embed.set_image(url="https://cdn.discordapp.com/attachments/783747422898880533/828266665602580500/ghostrunner-review.jpg")
+        embed.set_footer(text=vocabulary.help.footer)
+        embed.set_thumbnail(url=self.bot.user.avatar_url)
+
+        vocabulary = speech_setting(ctx.guild.id)
         embed.add_field(
-            name="Воспроизведение музыки :track_previous: :stop_button: :play_pause:",
-            value=f"""Этот модуль был создан, чтобы ты мог чилить со своими друзьями в голосовом канале и параллельно слушать любимый музон {self.get_emoji("sadpanda")}
-**{prefix}{commands_names["music player"]["help"]}** - отдельный эмбед для вывода помощи по плэеру
-**{prefix}{commands_names["music player"]["join"]}** - зайду в голосовой канала, в котором находится автор сообщения.
-**{prefix}{commands_names["music player"]["leave"]}** - уйду из голосового канала
-**{prefix}{commands_names["music player"]["queue"]}** - выведу очередь треков
-**{prefix}{commands_names["music player"]["queue"]} <url>** - добавлю в очередь трек
-**{prefix}{commands_names["music player"]["remove"]} <number>** - удалю трек под номером <number>
-**{prefix}{commands_names["music player"]["play"]}** - начну играть музыку из очереди
-**{prefix}{commands_names["music player"]["pause"]}** - поставлю на паузу шарманку
-**{prefix}{commands_names["music player"]["resume"]}** - воспроизведу воспроизведение {self.get_emoji('sho')}
-**{prefix}{commands_names["music player"]["stop"]}** - уберу трек из очереди и остановлю проигрывание""",
+            name=vocabulary.glossary.help.title + " " + vocabulary.glossary.help.description,
+            value=vocabulary.glossary.help.value,
             inline=False
         )
         embed.add_field(
-            name="Крестики-нолики :negative_squared_cross_mark: :o2:",
-            value=f"""Модуль с крестиками-ноликами для игр с друзьями или мной
-**{prefix}{commands_names["tic tac toe"]["help"]}** - отдельный эмбед для вывода инфы о крестиках ноликах
-**{prefix}{commands_names["tic tac toe"]["rules"]}** - отдельный эмбед для вывода правил крестиков ноликов
-**{prefix}{commands_names["tic tac toe"]["init game"]} <member1> <member2>** - начало игры с указанием двух юзеров
-**{prefix}{commands_names["tic tac toe"]["place"]} <number>** - поместит нужный символ в клетку
-:one: :two: :three:
-:four: :five: :six:
-:seven: :eight: :nine:
-**{prefix}{commands_names["tic tac toe"]["lose"]}** - текущий игрок сдастся""",
+            name=vocabulary.glossary.help.language_field.name,
+            value="\n".join(vb.keys())
+        )
+        embed.add_field(
+            name=vocabulary.glossary.help.vibe_field.name,
+            value="\n".join(vb[current_language(ctx.guild.id)].__dict__.keys())
+        )
+        embed.add_field(
+            name=vocabulary.music_player.help.title + " " + vocabulary.music_player.help.description,
+            value=vocabulary.music_player.help.value,
             inline=False
         )
         embed.add_field(
-            name="Четыре в ряд :blue_square: :yellow_square:",
-            value=f"""Аналогичный модуль крестикам-ноликам, катай с друзьями или со мной
-**{prefix}{commands_names["connect four"]["help"]}** - отдельный эмбед для вывода инфы о четыре в ряд
-**{prefix}{commands_names["connect four"]["rules"]}** - отдельный эмбед для вывода правил четыре в ряд
-**{prefix}{commands_names["connect four"]["init game"]} <member1> <member2>** - начало игры с указанием двух участников
-**{prefix}{commands_names["connect four"]["place"]} <number>** - бросок фишки в колонку с указанным номером
-**{prefix}{commands_names["connect four"]["lose"]}** - текущий игрок сдастся""",
+            name=vocabulary.tic_tac_toe_game.game_help.title + " " + vocabulary.tic_tac_toe_game.game_help.description,
+            value=vocabulary.tic_tac_toe_game.game_help.value,
             inline=False
         )
         embed.add_field(
-            name=f"Дни рождения {self.get_emoji('wowcry')}",
-            value=f"""Я, в отличии от друзей, всегда поздравлю тебя в тот самый день
-**{prefix}{commands_names["birthdays"]["help"]}** - поможет тебе понять как устроен модуль Birthdays.
-**{prefix}{commands_names["birthdays"]["set chat"]} <chat>** - указание чата, куда будут прилетать мои поздравления.
-**{prefix}{commands_names["birthdays"]["up chat"]} <chat>** - обновление чата для поздравлений.
-**{prefix}{commands_names["birthdays"]["del chat"]}** - удаления чата для поздравлений, **вы не будете получать мои поздравления**.
-**{prefix}{commands_names["birthdays"]["show chat"]}** - вывод чата, куда будут поступать поздравления.
-**{prefix}{commands_names["birthdays"]["add"]} <year> <month> <day>** - внос в базу данных с указанием года, месяца и дня.
-**{prefix}{commands_names["birthdays"]["up"]} <year> <month> <day>** - обновит текущую дату.
-**{prefix}{commands_names["birthdays"]["delete"]}** - удалит данные из базы.
-**{prefix}{commands_names["birthdays"]["show bd"]}** - выведет эмбед о вас.
-**{prefix}{commands_names["birthdays"]["show bds"]}** - выводит список всех дней рождений сервера.""",
+            name="ЧЕТЫРЕ В РЯД",
+            value="В разработке",
             inline=False
         )
         embed.add_field(
-            name=f"{self.get_emoji('reeee')} Модуль переводчик {self.get_emoji('thinksmart1')}",
-            value=f"""Я смогу перевести все что ты захочешь с любого на любой язык, определить язык тоже не проблема. Также можем поиграть в игру угадай язык.
-**{prefix}{commands_names["translator"]["help"]}** - помогу тебе отдельным эмбедом со всеми командами
-**{prefix}{commands_names["translator"]["list of languages"]}** - в следующих командах и играх ты должен будешь вводить язык и для упрощения я ввел систему кратких обозначений, эта команда выведет их
-**{prefix}{commands_names["translator"]["translate"]} <source lang> <target lang> <message>** - переведу фразу с исходного языка на итоговый
-**{prefix}{commands_names["translator"]["translate"]} <target lang> <message>** - сам определю исходный язык и переведу тебе все на указанный язык (иногда могу ошибаться, тогда юзай команду выше)
-**{prefix}{commands_names["translator"]["detect language"]} <message>** - выведу тебе язык исходного сообщения
-**{prefix}{commands_names["translator"]["game detect languages"]}** - начну игру "угадай язык" и буду ждать твоего ответа""",
+            name=vocabulary.birthdays.help.title,
+            value=vocabulary.birthdays.help.value,
             inline=False
         )
         embed.add_field(
-            name="Система уровней :bar_chart:",
-            value=f"""Модуль, созданный для создания классового неравенства на сервере, повышения активности в чатах и конкурентности.
-**{prefix}{commands_names["level"]["help"]}** - поможет тебе понять как устроен модуль LevelSystem.
-**{prefix}{commands_names["level"]["add"]} <role> <xp>** - внос в базу данных с указанием роли и количество опыта для ее получения.
-**{prefix}{commands_names["level"]["up"]} <role> <xp>** - обновит данную роль.
-**{prefix}{commands_names["level"]["delete"]}** - удалит роль из базы данных.
-**{prefix}{commands_names["level"]["show levels"]}** - выведет список всех уровней сервера и количество опыта для их получения.
-**{prefix}{commands_names["level"]["show level"]}** - выведет эмбед о вашем уровне.
-**{prefix}{commands_names["level"]["dashboard"]}** - выведет топ участников сервера."""
-        )
-        embed.add_field(
-            name=f"Прочие команды {self.get_emoji('peepoban')}",
-            value=f"""Команды, которые я в душе не ебу в какой модуль пихать, поэтому считай что это некий unsorted. Сборник мелких забавных команд.
-**{prefix}{commands_names["mini cogs"]["head or tails"]}** - подкинет монетку
-**{prefix}{commands_names["mini cogs"]["magic ball"]} <message>** - дам тебе ответы на все вопросы {self.get_emoji('reeee')}
-**{prefix}{commands_names["mini cogs"]["get forecast"]} <place>** - выведу прогноз погоды в заданном месте
-**{prefix}{commands_names["mini cogs"]["quote"]}** - вдохновлю тебя на великие свершения""",
+            name=vocabulary.translator.help.title + " " + vocabulary.translator.help.description,
+            value=vocabulary.translator.help.value,
             inline=False
         )
         embed.add_field(
-            name=f"Реакции на сообщения {self.get_emoji('peepohappy')}",
-            value=f"Я блять считай как живой, реагирую на все обращения к себе. Будете обижать меня - буду хуярить в ответ у бля {self.get_emoji('fuck')}. Если тебе грустно - кину тебе котика. "
-                  f"Скажешь что я пиздатый - я тебя расцелую сладенький мой {self.get_emoji('giggle')}. Напишешь кот или кошка - кину котика, такая же хуйня с собакой или песиком. Короче будь "
-                  "лапочкой, я слежу за тобой, малыш."
+            name=vocabulary.level_system.help.title + " " + vocabulary.level_system.help.description,
+            value=vocabulary.level_system.help.value
+        )
+        embed.add_field(
+            name=vocabulary.mini_cogs.help.title,
+            value=vocabulary.mini_cogs.help.value,
+            inline=False
         )
         await ctx.send(embed=embed)
 
-    @commands.Cog.listener()
-    async def on_message(self, message):
-        """Reacting on messages and send request by phrase"""
-        msg = message.content.lower()
-        if message.author == self.bot.user:
-            return
-
-        """Commands ------------------------------------------------------------------------------"""
-
-        if any(msg.startswith(i) for i in ("кот", "кош", "cat", "kitty")):
-            await message.channel.send(embed=self.embed_cat(message.author))
-        elif any(msg.startswith(i) for i in ("пес", "соба", "dog", "woof")):
-            await message.channel.send(embed=self.embed_dog(message.author))
-        elif any(msg.startswith(i) for i in ("meme", "мем", "мемчик", "мемас")):
-            await message.channel.send(embed=self.embed_meme(message.author))
-
-        """Reacting on basic phrases -------------------------------------------------------------"""
-
-        if msg.startswith("привет"):
-            await message.channel.send("Приветствую вас!")
-        elif msg.startswith("нахуй юлю"):
-            await message.channel.send("туда ее")
-            await message.channel.send(self.get_emoji("julia"))
-        elif any(phrase in msg for phrase in self.phrases["insults"]):
-            await message.channel.send(choice([
-                f"Блять обижать старого решил сука, я же тебе ебальник набью, понял? Я уже договорился, за тобой едут, последний понедельник блять живешь {self.get_emoji('ahuet')}",
-                f"Мать твоя блять сын собаки {self.get_emoji('kavo')}", f"Попущенных никто не спрашивал {self.get_emoji('fuck')}"
-            ]))
-        elif any(phrase in msg for phrase in self.phrases["compliments"]):
-            await message.channel.send(choice([
-                f"Ты же мой пупсик сладенький, люблю тебя {self.get_emoji('wowcry')}", f"Бля я тебя обожаю солнышко мое {self.get_emoji('pandalove')}",
-                f"Блять какой же ты зайка, ты меня смущаешь {self.get_emoji('giggle')}", "Целую мое солнышко в лобик", "Ты экстра супер пупсик :heart:"
-            ]))
-        elif any(phrase in msg for phrase in self.phrases["sad"]):
-            await message.channel.send("не грусти зайка, вот тебе котик")
-            await message.channel.send(embed=self.embed_cat(message.author))
-        elif msg.startswith("арина сука"):
-            await message.channel.send("согласен")
-            await message.channel.send(self.get_emoji("ahuet"))
+    # @commands.Cog.listener()
+    # async def on_message(self, message):
+    #     """Reacting on messages and send request by phrase"""
+    #     msg = message.content.lower()
+    #     if message.author == self.bot.user:
+    #         return
+    #
+    #     """Commands ------------------------------------------------------------------------------"""
+    #
+    #     if any(msg.startswith(i) for i in ("кот", "кош", "cat", "kitty")):
+    #         await message.channel.send(embed=self.embed_cat(message.author))
+    #     elif any(msg.startswith(i) for i in ("пес", "соба", "dog", "woof")):
+    #         await message.channel.send(embed=self.embed_dog(message.author))
+    #     elif any(msg.startswith(i) for i in ("meme", "мем", "мемчик", "мемас")):
+    #         await message.channel.send(embed=self.embed_meme(message.author))
+    #
+    #     """Reacting on basic phrases -------------------------------------------------------------"""
+    #
+    #     if any(phrase in msg for phrase in self.phrases["insults"]):
+    #         await message.channel.send(choice([
+    #             f"Блять обижать старого решил сука, я же тебе ебальник набью, понял? Я уже договорился, за тобой едут, последний понедельник блять живешь {self.get_emoji('ahuet')}",
+    #             f"Мать твоя блять сын собаки {self.get_emoji('kavo')}", f"Попущенных никто не спрашивал {self.get_emoji('fuck')}"
+    #         ]))
+    #     elif any(phrase in msg for phrase in self.phrases["compliments"]):
+    #         await message.channel.send(choice([
+    #             f"Ты же мой пупсик сладенький, люблю тебя {self.get_emoji('wowcry')}", f"Бля я тебя обожаю солнышко мое {self.get_emoji('pandalove')}",
+    #             f"Блять какой же ты зайка, ты меня смущаешь {self.get_emoji('giggle')}", "Целую мое солнышко в лобик", "Ты экстра супер пупсик :heart:"
+    #         ]))
+    #     elif any(phrase in msg for phrase in self.phrases["sad"]):
+    #         await message.channel.send("не грусти зайка, вот тебе котик")
+    #         await message.channel.send(embed=self.embed_cat(message.author))
 
     @commands.has_permissions(administrator=True)
     @commands.command(name="print_click_to_role")

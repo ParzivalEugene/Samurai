@@ -1,31 +1,41 @@
-import discord
-from discord.ext import commands
-import wikipedia
 from random import choice
-from cogs.commands import commands_names
-from cogs.config import prefix
+
+import discord
+import wikipedia
+from discord.ext import commands
+
+from cogs.commands import commands_names as cs
+from cogs.glossary import speech_setting
+
+commands_names = cs.wikipedia
 
 
 class Wikipedia(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.site = "https://samuraibot.brizy.site/"
-        wikipedia.set_lang("ru")
 
-    @commands.command(name="wp")
+    @commands.command(name=commands_names.wikipedia_search)
     async def wikipedia_search(self, ctx, *message):
+        wikipedia.set_lang(current_language(ctx.guild.id))
+        vocabulary = speech_setting(ctx.guild.id).wikipedia
+        if not message:
+            return await self.wikipedia_search_error(ctx, commands.MissingRequiredArgument)
         try:
             if message[0] == "<@!825433682205606000>":
+                site = "https://samuraibot.brizy.site/"
                 embed = discord.Embed(
-                    description=choice([
-                        f"Внучок, не льсти мне, про меня еще нет википедии, зато ты можешь рассказать обо мне своим друзьям, вот [сайтик про меня]({self.site})",
-                        f"Зайка не льсти мне, про меня еще нет вики, зато ты можешь посмотреть на [сайт про меня]({self.site}) и рассказать друзьям"
-                    ]),
+                    description=choice(vocabulary.wikipedia_search.description_about_me).format(site),
                     colour=discord.Colour.purple()
                 )
                 return await ctx.send(embed=embed)
             await ctx.send(wikipedia.summary(message))
         except Exception:
-            await ctx.send(choice([
-                "Внучок, я не ебу что это", "Сынок, нихуя не нашел", "Малыш, в душе не ебу что ты мне накакал"
-            ]))
+            await ctx.send(choice(vocabulary.wikipedia_search.error))
+
+    @wikipedia_search.error
+    async def wikipedia_search_error(self, ctx, error):
+        vocabulary = speech_setting(ctx.guild.id).wikipedia
+        if isinstance(error, commands.MissingRequiredArgument) or error == commands.MissingRequiredArgument:
+            return await ctx.send(choice(vocabulary.wikipedia_search_error.MissingRequiredArgument))
+        if isinstance(error, commands.BadArgument):
+            await ctx.send(choice(vocabulary.wikipedia_search_error.BadArgument))

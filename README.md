@@ -1,9 +1,30 @@
 # Samurai Discord Bot
 
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/ParzivalEugene/Samurai) ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/ParzivalEugene/Samurai)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/w/ParzivalEugene/Samurai) ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/ParzivalEugene/Samurai/master)
+
+## Table of Contents
+
+* [Description](#description)
+* [Commands](#commands)
+* [Music module](#music-module)
+* [Leveling module](#leveling-module)
+* [Birthdays module](#birthdays-module)
+* [Tic Tac Toe](#tic-tac-toe)
+* [Connect Four](#connect-four)
+* [Translator](#translator)
+* [Useful modules](#useful-modules)
+* [History of creation](#history-of-creation)
+* [License](#license)
+
 ## Description
-An incredible discord bot named Samurai. It is simply irreplaceable on any server. A samurai can create a level system, moderate participants, wish them a happy birthday. Also, a samurai can play simple games (tic-tac-toe and connect four) with different tactics. It can play songs from YouTube, create queues and playlists. Reacts amazingly accurately to appeals to him and will always keep up the conversation. Recommended for installation on each server.
+
+An incredible discord bot named Samurai. It is simply irreplaceable on any server. A samurai can create a level system, moderate participants, wish them a happy birthday. Also, a samurai can play
+simple games (tic-tac-toe and connect four) with different tactics. It can play songs from YouTube, create queues and playlists. Reacts amazingly accurately to appeals to him and will always keep up
+the conversation. Recommended for installation on each server.
 
 ## Commands
+
 Samurai is very clever bot that tries its best to be alive.
 
 > **help** - Main command, will display a description of the bot with commands and rules for their use.
@@ -111,15 +132,24 @@ Weather forecast around the world, inspiration for the coming day, stories about
 | **inspire** | Will inspire you to great achievements. |
 
 ## History of creation
+
 > First start - Samurai's birthday - **March 24, 2021**
 
-At the age of fifteen, having my own discord server (at that time the server had an audience of <100 people), I began to think about developing my own bot. I knew about other bots, and it amazed me how cool they can be. The wonderful [Groovy](https://groovy.bot/), the handy [Carl](https://carl.gg/) and the irreplaceable [KD](https://top.gg/bot/414925323197612032) were an integral part of my server. But over time, a subscription system came to each of these bots, and we, being schoolchildren, could not give even $5 for groovy.
-Having a little programming skills in [python](https://en.wikipedia.org/wiki/Python_ (programming_language)), I wanted to create my first large-scale project in which I could link everything I can. In my vision, this was supposed to be a project where I can fully realize my potential: use a database and [SQL](https://ru.wikipedia.org/wiki/SQL), handle https requests, write beautiful and structured code , use different api and modules. In this regard, WEB applications are the most cost-effective, because they are multifaceted and can carry any function. I became interested in bots and sites, tried to create bots in [telegram](https://tlgrm.ru/), but this did not drag me out at all, I did not see how I could develop my bot on this platform. But one evening, sitting with a friend in discord, I thought how cool it would be if the bot responded to my messages. For example, I write how sad I am, and he will cheer me up. It sounded like a dream, but it became a goal for me. After digging in [Discord Api](https://discordpy.readthedocs.io/en/latest/api.html) for a week and looking at a bunch of tutorials, I wrote the simplest version of the bot. He reacted to a couple of messages with just one phrase and could send stickers. But after spending a month coding, my bot has learned a lot, as you can see from the function chapter. For me, this is only the first step, and I plan to further develop the bot.
+At the age of fifteen, having my own discord server (at that time the server had an audience of <100 people), I began to think about developing my own bot. I knew about other bots, and it amazed me
+how cool they can be. The wonderful [Groovy](https://groovy.bot/), the handy [Carl](https://carl.gg/) and the irreplaceable [KD](https://top.gg/bot/414925323197612032) were an integral part of my
+server. But over time, a subscription system came to each of these bots, and we, being schoolchildren, could not give even $5 for groovy. Having a little programming skills
+in [python](https://en.wikipedia.org/wiki/Python_ (programming_language)), I wanted to create my first large-scale project in which I could link everything I can. In my vision, this was supposed to be
+a project where I can fully realize my potential: use a database and [SQL](https://ru.wikipedia.org/wiki/SQL), handle https requests, write beautiful and structured code , use different api and
+modules. In this regard, WEB applications are the most cost-effective, because they are multifaceted and can carry any function. I became interested in bots and sites, tried to create bots
+in [telegram](https://tlgrm.ru/), but this did not drag me out at all, I did not see how I could develop my bot on this platform. But one evening, sitting with a friend in discord, I thought how cool
+it would be if the bot responded to my messages. For example, I write how sad I am, and he will cheer me up. It sounded like a dream, but it became a goal for me. After digging
+in [Discord Api](https://discordpy.readthedocs.io/en/latest/api.html) for a week and looking at a bunch of tutorials, I wrote the simplest version of the bot. He reacted to a couple of messages with
+just one phrase and could send stickers. But after spending a month coding, my bot has learned a lot, as you can see from the function chapter. For me, this is only the first step, and I plan to
+further develop the bot.
 
 > It was written on April 22nd, 2021.
 
-## Author
-The author of this kid is me - [Parzival](https://github.com/ParzivalEugene), 15-year-old man from Moscow. I am fond of programming in the [python](https://en.wikipedia.org/wiki/Python_ (programming_language)), I can create a desktop application on [PyQT](https://en.wikipedia.org/wiki/PyQt), write a game on [pygame](https://en.wikipedia.org/wiki/Pygame), I know the basics of [html](https://en.wikipedia.org/wiki/HTML) and [css](https://en.wikipedia.org/wiki/CSS), in short, the most basic knowledge of a pythonist. My [discord server](https://discord.gg/WuTaFrker6).
-
 ## License
+
+![GitHub](https://img.shields.io/github/license/ParzivalEugene/Samurai)
 At the moment, I'm not really looking at how my code can be used, but so far it is open to everyone for non-commercial use.

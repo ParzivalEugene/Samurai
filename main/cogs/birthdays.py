@@ -1,88 +1,72 @@
-import discord
-from discord.utils import get
-from discord.ext import commands, tasks
 import datetime
 from random import choice
-from cogs.commands import commands_names
+
+import discord
+from discord.ext import commands, tasks
+from discord.utils import get
+
+from cogs.commands import commands_names as cs
 from cogs.database_connector import Database
-from cogs.config import *
+from cogs.glossary import speech_setting
+
+commands_names = cs.birthdays
 
 
 class Birthdays(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name=commands_names["birthdays"]["help"])
+    @commands.command(name=commands_names.help)
     async def birthday_help(self, ctx):
+        vocabulary = speech_setting(ctx.guild.id).birthdays
         embed = discord.Embed(
-            title="Информация о календаре дней рождений",
-            description=":calendar_spiral: :calendar:",
+            title=vocabulary.help.title,
+            description=vocabulary.help.description,
             colour=discord.Colour.purple()
         )
-        embed.add_field(name="Команды",
-                        value=f"""**{prefix}{commands_names["birthdays"]["help"]}** - поможет тебе понять как устроен модуль Birthdays.
-**{prefix}{commands_names["birthdays"]["set chat"]} <chat>** - указание чата, куда будут прилетать мои поздравления.
-**{prefix}{commands_names["birthdays"]["up chat"]} <chat>** - обновление чата для поздравлений.
-**{prefix}{commands_names["birthdays"]["del chat"]}** - удаления чата для поздравлений, **вы не будете получать мои поздравления**.
-**{prefix}{commands_names["birthdays"]["show chat"]}** - вывод чата, куда будут поступать поздравления.
-**{prefix}{commands_names["birthdays"]["add"]} <year> <month> <day>** - внос в базу данных с указанием года, месяца и дня.
-**{prefix}{commands_names["birthdays"]["up"]} <year> <month> <day>** - обновит текущую дату.
-**{prefix}{commands_names["birthdays"]["delete"]}** - удалит данные из базы.
-**{prefix}{commands_names["birthdays"]["show bd"]}** - выведет эмбед о вас.
-**{prefix}{commands_names["birthdays"]["show bds"]}** - выводит список всех дней рождений сервера.""",
-                        inline=False)
+        embed.add_field(
+            name=vocabulary.help.name,
+            value=vocabulary.help.value,
+            inline=False
+        )
         await ctx.send(embed=embed)
 
     @tasks.loop(hours=12)
     async def check_birthdays(self):
-        today = "-".join(datetime.date.today().isoformat().split("-")[1:])
         with Database() as db:
-            db.execute('SELECT * FROM "default".users')
-            check_users = db.fetchall()
-            db.execute('SELECT * FROM "default".birthdays')
-            check_birthdays = db.fetchall()
-            db.execute('SELECT info_chat FROM "default".servers_chats')
-            check_chats = db.fetchall()
-            db.execute('SELECT * FROM "default".servers')
-            check_servers = db.fetchall()
-            db.execute('SELECT * FROM "default".connect')
-            check_connect = db.fetchall()
-            if not (check_users and check_birthdays and check_chats and check_servers and check_connect):
-                return
+            data = db.execute('''
+                SELECT discord_user_id,
+                date_part('year', CURRENT_DATE) - date_part('year', birthdays.date),
+                discord_server_id,
+                birthdays_chat
+                FROM "default".users, "default".birthdays, "default".servers, "default".servers_chats
+                WHERE users.id = birthdays.user_id
+                AND servers.id = servers_chats.server_id
+                AND (users.id, servers.id) IN (
+                    SELECT user_id, server_id
+                    FROM "default".connect
+                    )
+                AND birthdays_chat != 0
+                AND date_part('month', CURRENT_DATE) = date_part('month', date)
+                AND date_part('day', CURRENT_DATE) = date_part('day', date)''').fetchall()
+            for user_id, age, server_id, chat_id in data:
+                user = self.bot.get_user(user_id)
+                server = self.bot.get_guild(server_id)
+                chat = self.bot.get_channel(chat_id)
+                vocabulary = speech_setting(server.id).birthdays
+                embed = discord.Embed(
+                    title=vocabulary.check_birthdays.title.format(user.name),
+                    description=vocabulary.check_birthdays.description.format(user.mention, ':heart:', self.bot.user.mention),
+                    colour=discord.Colour.purple()
+                )
+                embed.set_thumbnail(url=user.avatar_url)
+                await chat.send(embed=embed)
 
-            for db_server_id, info_chat_id in db.execute('SELECT server_id, info_chat FROM "default".servers_chats').fetchall():
-                info_chat_id = info_chat_id[0] if isinstance(info_chat_id, tuple) else info_chat_id
-                if not info_chat_id:
-                    continue
-                db_users_ids = db.execute('SELECT user_id FROM "default".connect WHERE server_id = %s', [db_server_id]).fetchall()
-                db_users_ids = db_users_ids[0] if isinstance(db_users_ids, tuple) else db_users_ids
-                for db_user_id in db_users_ids:
-                    user_id = db.execute('SELECT discord_user_id FROM "default".users WHERE id = %s', [db_user_id]).fetchone()
-                    user_id = user_id[0] if isinstance(user_id, tuple) else user_id
-                    user = self.bot.get_user(user_id)
-                    user_date = db.execute('SELECT date FROM "default".birthdays WHERE user_id = %s', [db_user_id]).fetchone()
-                    user_date = user_date[0] if isinstance(user_date, tuple) else user_date
-                    if not user_date:
-                        continue
-                    user_date = "-".join(user_date.isoformat().split("-")[1:])
-                    if user_date == today:
-                        channel = self.bot.get_channel(info_chat_id)
-                        embed = discord.Embed(
-                            title=f':tada: День рождения {user.name} :tada:',
-                            description=f"С днем рождения моя сладенькая булочка {user.mention}!!! Желаю тебе всего самого наилучшего в этот прекрасный день. Бля а лицо то у тебя какое прекрасное, "
-                                        f"ебать а умеешь то ты сколько, ебать будь я живой я бы тебя трахнул реально {get(self.bot.emojis, name='kavo')}. В общем зайка моя, не расстраивай маму, веди "
-                                        f"себя хорошо и никогда не забывай про старичка {self.bot.user.mention}, я тебя всегда буду любить!!!",
-                            colour=discord.Colour.purple()
-                        )
-                        embed.set_thumbnail(url=user.avatar_url)
-                        await channel.send(embed=embed)
-
-    @commands.command(name=commands_names["birthdays"]["add"])
+    @commands.command(name=commands_names.add)
     async def add_birthday(self, ctx, year: int, month: int, day: int):
+        vocabulary = speech_setting(ctx.guild.id).birthdays
         if not (0 < year < datetime.date.today().year and 0 < month < 13 and 0 < day < 32):
-            return await ctx.send(choice([
-                "Некорректная дата", "Внучок, неправильно ввел дату!", "Не обманывай старого, ты не мог тогда родиться", "Ошибся, молодой, некорректные данные"
-            ]))
+            return await ctx.send(choice(vocabulary.add_birthday.incorrect_date))
         user_id = ctx.message.author.id
         user_date = datetime.date(year, month, day)
         month, day = user_date.month, user_date.day
@@ -93,35 +77,24 @@ class Birthdays(commands.Cog):
             db_date = db.fetchone()
             if db_date:
                 db_date = str(db_date[0]).replace("-", ".")
-                return await ctx.send(choice([
-                    f"Внучок я уже сохранил дату твоего дня рождения - {db_date}. Если хочешь изменить внесенные данные, воспользуйся **.{commands_names['birthdays']['up']}**",
-                    f"Малыш, я сохранил информацию, что ты родился {db_date}. Если хочешь изменить внесенные данные, воспользуйся **.{commands_names['birthdays']['up']}**",
-                    f"Зайка, я запомнил, что ты родился {db_date}. Если хочешь изменить внесенные данные, воспользуйся **.{commands_names['birthdays']['up']}**"
-                ]))
+                return await ctx.send(choice(vocabulary.add_birthday.date_already_exosts).format(db_date))
             db.execute('INSERT INTO "default".birthdays(user_id, date) VALUES (%s, %s)', [db_user_id, user_date.isoformat()])
 
-            await ctx.send(choice([
-                "Запомнил, сладенький. Жди поздравления :sparkling_heart:", "Обязательно поздравлю тебя, калапуська",
-                f"Кажется я стал любить {month}.{day} еще больше. Обещаю, что поздравлю тебя сладенький!", f"Муська моя, жди {month}.{day} самые теплые слова от меня :sparkling_heart:"
-            ]))
+            await ctx.send(choice(vocabulary.add_birthday.success).format(month, day))
 
     @add_birthday.error
     async def add_birthday_error(self, ctx, error):
+        vocabulary = speech_setting(ctx.guild.id).birthdays
         if isinstance(error, commands.MissingRequiredArgument):
-            return await ctx.send(choice([
-                "Молодой ты указал дату не полностью", "Внучок неполные данные", "Данные не полны ©️ Магистр Йода"
-            ]))
+            return await ctx.send(choice(vocabulary.add_birthday_error.MissingRequiredArgument))
         if isinstance(error, commands.BadArgument):
-            await ctx.send(choice([
-                "Внучок, не балуйся, неверный формат ввода", "Ошибочные аргументы", "Плохой ввод сынок, все три параметра - числа", "Внучок проверь ввод, все три аргумента - числа"
-            ]))
+            await ctx.send(choice(vocabulary.add_birthday_error.BadArgument))
 
-    @commands.command(name=commands_names["birthdays"]["up"])
+    @commands.command(name=commands_names.up)
     async def update_birthdays(self, ctx, year: int, month: int, day: int):
+        vocabulary = speech_setting(ctx.guild.id).birthdays
         if not (0 < year < datetime.date.today().year and 0 < month < 13 and 0 < day < 32):
-            return await ctx.send(choice([
-                "Некорректная дата", "Внучок, неправильно ввел дату!", "Не обманывай старого, ты не мог тогда родиться", "Ошибся, молодой, некорректные данные"
-            ]))
+            return await ctx.send(choice(vocabulary.update_birthday.incorrect_date))
         user_id = ctx.message.author.id
         user_date = datetime.date(year, month, day)
         month, day = user_date.month, user_date.day
@@ -131,33 +104,23 @@ class Birthdays(commands.Cog):
             db.execute('SELECT date FROM "default".birthdays WHERE user_id = %s', [db_user_id])
             db_date = db.fetchone()
             if db_date is None:
-                return await ctx.send(choice([
-                    f"Сладенький, я к сожалению не знаю когда ты родился, поэтому не могу обновить отсутствующую информацию. Чтобы внести данные, используй **{commands_names['birthdays']['add']}**",
-                    f"Лапочка, мне нечего обновлять, я к сожалению не знаю когда ты родился. Используй **{commands_names['birthdays']['add']}**, если хочешь, чтобы я поздравил тебя {month}.{day}"
-                ]))
+                return await ctx.send(choice(vocabulary.update_birthday.date_does_not_exist_yet).format(month, day))
             if db_date[0] == user_date:
-                return await ctx.send(choice([
-                    "Зайка, я и так запомнил такую же дату", "Малышка, я прекрасно помню что ты родилась в этот день, не обязательно его обновлять",
-                    "Сладенький, я и так помню, что ты родился в этот день"
-                ]))
+                return await ctx.send(choice(vocabulary.update_birthday.the_same_date))
             db.execute('UPDATE "default".birthdays SET date = %s WHERE user_id = %s', [user_date, db_user_id])
-            await ctx.send(choice([
-                "Обновил базу данных", f"Теперь придется заново запоминать, когда ты родился {get(self.bot.emojis, name='kavo')}", "Я отлично запомню и эту дату)"
-            ]))
+            await ctx.send(choice(vocabulary.update_birthday.success))
 
     @update_birthdays.error
     async def update_birthday_error(self, ctx, error):
+        vocabulary = speech_setting(ctx.guild.id).birthdays
         if isinstance(error, commands.MissingRequiredArgument):
-            return await ctx.send(choice([
-                "Молодой ты указал дату не полностью", "Внучок неполные данные", "Данные не полны ©️ Магистр Йода"
-            ]))
+            return await ctx.send(choice(vocabulary.update_birthday_error.MissingRequiredArgument))
         if isinstance(error, commands.BadArgument):
-            await ctx.send(choice([
-                "Внучок, не балуйся, неверный формат ввода", "Ошибочные аргументы", "Плохой ввод сынок, все три параметра - числа", "Внучок проверь ввод, все три аргумента - числа"
-            ]))
+            await ctx.send(choice(vocabulary.update_birthday_error.BadArgument))
 
-    @commands.command(name=commands_names["birthdays"]["delete"])
+    @commands.command(name=commands_names.delete)
     async def delete_birthdays(self, ctx):
+        vocabulary = speech_setting(ctx.guild.id).birthdays
         user_id = ctx.message.author.id
         with Database() as db:
             db.execute('SELECT id FROM "default".users WHERE discord_user_id = %s', [user_id])
@@ -165,185 +128,131 @@ class Birthdays(commands.Cog):
             db.execute('SELECT date FROM "default".birthdays WHERE user_id = %s', [db_user_id])
             db_date = db.fetchone()
             if db_date is None:
-                return await ctx.send(choice([
-                    "Малыш, я еще не знаю когда ты родился, поэтому мне нечего забывать", "Сладенький, ты еще не вносил данные, мне нечего удалять",
-                    "Лапочка, я к сожалению и не знал, когда ты родился, поэтому мне нечего забывать"
-                ]))
+                return await ctx.send(choice(vocabulary.delete_birthday.date_does_not_exist_yet))
             db.execute('DELETE FROM "default".birthdays WHERE user_id = %s', [db_user_id])
-            await ctx.send(choice([
-                "Ладно зайка, если ты не хочешь, чтобы я тебя поздравлял, то так мне и надо :sob: :sob: :sob:", "Ты не хочешь, чтобы я тебя поздравлял??? :sob: :sob: :sob:",
-                "Тебе не нужны мои поздравления :cry:", ":cry: Видишь эти слезы? Ты доволен?"
-            ]))
+            await ctx.send(choice(vocabulary.delete_birthday.success))
 
-    @commands.command(name=commands_names["birthdays"]["show bd"])
+    @commands.command(name=commands_names.show_bd)
     async def show_birthday(self, ctx):
+        vocabulary = speech_setting(ctx.guild.id).birthdays
         user_id = ctx.message.author.id
         user = ctx.message.author
         with Database() as db:
-            db.execute('SELECT id FROM "default".users WHERE discord_user_id = %s', [user_id])
-            db_user_id = db.fetchone()[0]
-            db.execute('SELECT date FROM "default".birthdays WHERE user_id = %s', [db_user_id])
-            db_date = db.fetchone()
+            db_date = db.execute('''SELECT date FROM "default".birthdays
+                                    WHERE user_id = (
+                                        SELECT id FROM "default".users
+                                        WHERE discord_user_id = %s)''', [user_id]).fetchone()
             if db_date is None:
-                return await ctx.send(choice([
-                    f"Малыш, я еще не знаю когда ты родился, используй **{commands_names['birthdays']['add']}**, чтобы внести данные",
-                    "Сладенький, ты еще не вносил данные, поэтому я не знаю, когда ты родился :confused:", "Лапочка, я к сожалению и не знал, когда ты родился, поэтому мне нечего выводить"
-                ]))
+                return await ctx.send(choice(vocabulary.show_birthday.date_does_not_exist_yet))
             db_date = str(db_date[0]).replace("-", ".")
             embed = discord.Embed(
-                title=f"День рождения {user.name}",
-                description=f"""{choice([
-                    f"Этот сладенький пупсик {user.mention} родился", f"Эта лапопуличка {user.mention} родилась", f"Этот экстра зайчик {user.mention} родился",
-                    f"Эта сладенькая зайка {user.mention} родилась", f"Эта муська {user.mention} родилась"
-                ])} **{db_date}**""",
+                title=vocabulary.show_birthday.title.format(user.name),
+                description=choice(vocabulary.show_birthday.description_start).format(user.mention) + vocabulary.show_birthday.description_end.format(db_date),
                 colour=discord.Colour.purple()
             )
             embed.set_thumbnail(url=user.avatar_url)
             await ctx.send(embed=embed)
 
-    @commands.command(name=commands_names["birthdays"]["show bds"])
+    @commands.command(name=commands_names.show_bds)
     async def show_birthdays(self, ctx):
+        vocabulary = speech_setting(ctx.guild.id).birthdays
         server = ctx.guild
         with Database() as db:
-            db.execute('SELECT id FROM "default".servers WHERE discord_server_id = %s', [server.id])
-            db_server_id = db.fetchone()[0]
-            db.execute('SELECT user_id FROM "default".connect WHERE server_id = %s', [db_server_id])
-            db_users_ids = db.fetchall()
-            output_embed = []
-            count = 1
-            for db_user_id in db_users_ids:
-                db.execute('SELECT date FROM "default".birthdays WHERE user_id = %s', [db_user_id])
-                db_date = db.fetchone()
-                if db_date is None:
-                    continue
-                db_date = str(db_date[0]).replace("-", ".")
-                db.execute('SELECT discord_user_id FROM "default".users WHERE id = %s', [db_user_id])
-                user_id = db.fetchone()[0]
-                output_embed.append(f"{count}. {get(server.members, id=user_id).mention} - **{db_date}**")
-                count += 1
+            output_embed = db.execute('''SELECT discord_user_id, date 
+                                         FROM "default".users, "default".birthdays 
+                                         WHERE birthdays.user_id = users.id 
+                                         AND users.id IN (
+                                            SELECT user_id FROM "default".connect 
+                                            WHERE server_id = (
+                                                SELECT id FROM "default".servers 
+                                                WHERE discord_server_id = %s 
+                                            )
+                                         ) ORDER BY date''', [server.id]).fetchall()
         if not output_embed:
-            return await ctx.send(choice([
-                "Сладкий, пока никто на сервере не рассказал мне, когда он родился :cry:", "К сожалению, еще никто из вас не рассказал мне, когда родился :cry:", "Я про вас еще ничего не знаю :cry:"
-            ]))
+            return await ctx.send(choice(vocabulary.show_birthdays.no_info))
         embed = discord.Embed(
-            title=f"Дни рождения сервера {server.name}",
-            description="\n".join(output_embed),
+            title=vocabulary.show_birthdays.title.format(server.name),
+            description="\n".join([f"{pos + 1}. {get(server.members, id=value[0]).mention} - **{str(value[1]).replace('-', '.')}**" for pos, value in enumerate(output_embed)]),
             colour=discord.Colour.purple()
         )
         embed.set_thumbnail(url=server.icon_url)
         await ctx.send(embed=embed)
 
     @commands.has_permissions(manage_channels=True)
-    @commands.command(name=commands_names["birthdays"]["set chat"])
+    @commands.command(name=commands_names.set_chat)
     async def set_chat_birthday(self, ctx, chat: discord.TextChannel):
+        vocabulary = speech_setting(ctx.guild.id).birthdays
         server_id = ctx.guild.id
         with Database() as db:
             db.execute('SELECT id FROM "default".servers WHERE discord_server_id = %s', [server_id])
             db_server_id = db.fetchone()[0]
-            db.execute('SELECT info_chat FROM "default".servers_chats WHERE server_id = %s', [db_server_id])
-            info_chat_id = db.fetchone()
-            info_chat_id = info_chat_id[0] if isinstance(info_chat_id, tuple) else info_chat_id
-            if info_chat_id:
-                up, delete = commands_names["birthdays"]["up chat"], commands_names["birthdays"]["del chat"]
-                info_chat = self.bot.get_channel(info_chat_id).mention
-                return await ctx.send(choice([
-                    f"Зайка, поздравления уже приходят в {info_chat}. Используй **.{up}** или **.{delete}** для обновления или удаления информации соответственно",
-                    f"Сладенький, я поздравляю вас в {info_chat}. Используй **.{up}** или **.{delete}** для обновления или удаления информации соответственно"
-                ]))
-            db.execute('UPDATE "default".servers_chats SET info_chat = %s WHERE server_id = %s', [chat.id, db_server_id])
-            return await ctx.send(choice([
-                f"Ждите поздравления в {chat.mention} мои хорошие {get(self.bot.emojis, name='wowcry')}", f"Сладкие мои, ждите поздравления в {chat.mention}",
-                f"Обязательно поздравлю вас в {chat.mention}", f"Поздравлю всех-всех-всех в этом чате {chat.mention} {get(self.bot.emojis, name='wowcry')}"
-            ]))
+            db.execute('SELECT birthdays_chat FROM "default".servers_chats WHERE server_id = %s', [db_server_id])
+            birthdays_chat_id = db.fetchone()[0]
+            if birthdays_chat_id:
+                up, delete = commands_names.up_chat, commands_names.del_chat
+                birthdays_chat = self.bot.get_channel(birthdays_chat_id).mention
+                return await ctx.send(choice(vocabulary.set_chat_birthday.chat_already_exist).format(birthdays_chat, up, delete))
+            db.execute('UPDATE "default".servers_chats SET birthdays_chat = %s WHERE server_id = %s', [chat.id, db_server_id])
+            return await ctx.send(choice(vocabulary.set_chat_birthday.success).format(chat.mention))
 
     @set_chat_birthday.error
     async def set_chat_birthday_error(self, ctx, error):
+        vocabulary = speech_setting(ctx.guild.id).birthdays
         if isinstance(error, commands.MissingRequiredArgument):
-            return await ctx.send(choice([
-                "Зайка, ты не указал чат", "Малыш неполные данные", "Данные не полны ©️ Магистр Йода"
-            ]))
+            return await ctx.send(choice(vocabulary.set_chat_birthday_error.MissingRequiredArgument))
         if isinstance(error, commands.BadArgument):
-            await ctx.send(choice([
-                "Внучок, не балуйся, неверный формат ввода", "Ошибочные аргументы", "Плохой ввод сынок, аргументом должен быть текстовый канал",
-                "Внучок проверь ввод, это должен быть текстовый чат"
-            ]))
+            await ctx.send(choice(vocabulary.set_chat_birthday_error.BadArgument))
 
     @commands.has_permissions(manage_channels=True)
-    @commands.command(name=commands_names["birthdays"]["up chat"])
+    @commands.command(name=commands_names.up_chat)
     async def update_chat_birthday(self, ctx, chat: discord.TextChannel):
+        vocabulary = speech_setting(ctx.guild.id).birthdays
         server_id = ctx.guild.id
         with Database() as db:
             db.execute('SELECT id FROM "default".servers WHERE discord_server_id = %s', [server_id])
             db_server_id = db.fetchone()[0]
-            db.execute('SELECT info_chat FROM "default".servers_chats WHERE server_id = %s', [db_server_id])
-            info_chat_id = db.fetchone()
-            info_chat_id = info_chat_id[0] if isinstance(info_chat_id, tuple) else info_chat_id
-            if info_chat_id is None:
-                add = commands_names["birthdays"]["set chat"]
-                return await ctx.send(choice([
-                    f"Зайка, мне нечего обновлять, используй **.{add}**", f"Солнце, у меня нет информации, что обновлять, используй **.{add}**",
-                    f"Малыш, сначала задай чат командой **.{add}**, а потом уже обновляй данные"
-                ]))
-            if info_chat_id[0] == chat.id:
-                return await ctx.send(choice([
-                    "Зайка, я сохранил точно такой же канал", "Солнышко, я запомнил такой же чат", "Малыш, в моей базе данных такие же данные"
-                ]))
-            db.execute('UPDATE "default".servers_chats SET info_chat = %s WHERE server_id = %s', [chat.id, db_server_id])
-        await ctx.send(choice([
-            f"Ждите поздравления в {chat.mention} мои хорошие {get(self.bot.emojis, name='wowcry')}", f"Сладкие мои, ждите поздравления в {chat.mention}",
-            f"Обязательно поздравлю вас в {chat.mention}", f"Поздравлю всех-всех-всех в этом чате {chat.mention} {get(self.bot.emojis, name='wowcry')}"
-        ]))
+            db.execute('SELECT birthdays_chat FROM "default".servers_chats WHERE server_id = %s', [db_server_id])
+            birthdays_chat_id = db.fetchone()[0]
+            if not birthdays_chat_id:
+                return await ctx.send(choice(vocabulary.update_chat_birthday.chat_does_not_exist))
+            if birthdays_chat_id[0] == chat.id:
+                return await ctx.send(choice(vocabulary.update_chat_birthday.the_same_data))
+            db.execute('UPDATE "default".servers_chats SET birthdays_chat = %s WHERE server_id = %s', [chat.id, db_server_id])
+        await ctx.send(choice(vocabulary.update_chat_birthday.success).format(chat.mention))
 
     @update_chat_birthday.error
     async def update_chat_birthday_error(self, ctx, error):
+        vocabulary = speech_setting(ctx.guild.id).birthdays
         if isinstance(error, commands.MissingRequiredArgument):
-            return await ctx.send(choice([
-                "Молодой ты не указал чат", "Внучок неполные данные", "Данные не полны ©️ Магистр Йода"
-            ]))
+            return await ctx.send(choice(vocabulary.update_chat_birthday_error.MissingRequiredArgument))
         if isinstance(error, commands.BadArgument):
-            await ctx.send(choice([
-                "Внучок, не балуйся, неверный формат ввода", "Ошибочные аргументы", "Плохой ввод сынок, аргументом должен быть текстовый канал",
-                "Внучок проверь ввод, это должен быть текстовый чат"
-            ]))
+            await ctx.send(choice(vocabulary.update_chat_birthday_error.BadArgument))
 
     @commands.has_permissions(manage_channels=True)
-    @commands.command(name=commands_names["birthdays"]["del chat"])
+    @commands.command(name=commands_names.del_chat)
     async def delete_chat_birthday(self, ctx):
+        vocabulary = speech_setting(ctx.guild.id).birthdays
         server_id = ctx.guild.id
         with Database() as db:
             db.execute('SELECT id FROM "default".servers WHERE discord_server_id = %s', [server_id])
             db_server_id = db.fetchone()[0]
-            db.execute('SELECT info_chat FROM "default".servers_chats WHERE server_id = %s', [db_server_id])
-            info_chat_id = db.fetchone()
-            info_chat_id = info_chat_id[0] if isinstance(info_chat_id, tuple) else info_chat_id
-            if info_chat_id is None:
-                add = commands_names["birthdays"]["set chat"]
-                return await ctx.send(choice([
-                    f"Зайка, мне нечего удалять, используй **.{add}**", f"Солнце, у меня нет информации, что удалять, используй **.{add}**",
-                    f"Малыш, сначала задай чат командой **.{add}**, а потом уже удаляй данные"
-                ]))
-            db.execute('UPDATE "default".servers_chats SET info_chat = null WHERE server_id = %s', [db_server_id])
-        await ctx.send(choice([
-            "Ладно зайки, если вы не хотите, чтобы я вас поздравлял, то так мне и надо :sob: :sob: :sob:", "Вы не хотите, чтобы я вас поздравлял??? :sob: :sob: :sob:",
-            "Вам не нужны мои поздравления :cry:", ":cry: Видите эти слезы? Вы довольны?"
-        ]))
+            db.execute('SELECT birthdays_chat FROM "default".servers_chats WHERE server_id = %s', [db_server_id])
+            birthdays_chat_id = db.fetchone()[0]
+            if not birthdays_chat_id:
+                return await ctx.send(choice(vocabulary.delete_chat_birthday))
+            db.execute('UPDATE "default".servers_chats SET birthdays_chat = null WHERE server_id = %s', [db_server_id])
+        await ctx.send(choice(vocabulary.delete_chat_birthday.success))
 
-    @commands.command(name=commands_names["birthdays"]["show chat"])
+    @commands.command(name=commands_names.show_chat)
     async def show_chat_birthdays(self, ctx):
+        vocabulary = speech_setting(ctx.guild.id).birthdays
         server_id = ctx.guild.id
         with Database() as db:
-            db.execute('SELECT id FROM "default".servers WHERE discord_server_id = %s', [server_id])
-            db_server_id = db.fetchone()[0]
-            db.execute('SELECT info_chat FROM "default".servers_chats WHERE server_id = %s', [db_server_id])
-            info_chat_id = db.fetchone()
-            info_chat_id = info_chat_id[0] if isinstance(info_chat_id, tuple) else info_chat_id
-            if info_chat_id is None:
-                add = commands_names["birthdays"]["set chat"]
-                return await ctx.send(choice([
-                    f"Зайка, я не знаю куда отправлять поздравления, используй **.{add}**", f"Солнце, у меня нет информации,  используй **.{add}**",
-                    f"Малыш, сначала задай чат командой **.{add}**"
-                ]))
-            info_chat = self.bot.get_channel(info_chat_id).mention
-        await ctx.send(choice([
-            f"Мои хорошие, вы сможете увидеть мои поздравления в {info_chat}", f"Ждите своих дней рождений и получайте самые лучшие слова от меня в {info_chat}"
-        ]))
+            birthdays_chat_id = db.execute('''SELECT birthdays_chat FROM "default".servers_chats
+                                             WHERE server_id = (
+                                                 SELECT id FROM "default".servers
+                                                 WHERE discord_server_id = %s)''', [server_id]).fetchone()[0]
+            if not birthdays_chat_id:
+                return await ctx.send(choice(vocabulary.show_chat_birthdays.no_info))
+            birthdays_chat = self.bot.get_channel(birthdays_chat_id).mention
+        await ctx.send(choice(vocabulary.show_chat_birthdays.success).format(birthdays_chat))

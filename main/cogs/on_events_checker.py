@@ -1,8 +1,10 @@
-import discord
-from discord.utils import get
-from discord.ext import commands
-from cogs.database_connector import Database
 from random import choice
+
+import discord
+from discord.ext import commands
+from discord.utils import get
+
+from cogs.database_connector import Database
 
 
 class OnEventsChecker(commands.Cog):
@@ -24,6 +26,8 @@ class OnEventsChecker(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_update(self, before, after):
+        if before == self.bot.user:
+            return
         if before.roles != after.roles:
             with Database() as db:
                 db_user_id = db.execute('SELECT id FROM "default".users WHERE discord_user_id = %s', [after.id]).fetchone()[0]
@@ -130,6 +134,8 @@ class OnEventsChecker(commands.Cog):
         with Database() as db:
             db.execute('INSERT INTO "default".servers(discord_server_id) VALUES(%s) RETURNING id', [server_id])
             db_server_id = db.fetchone()[0]
+            db.execute('INSERT INTO "default".servers_languages_and_vibes(server_id) VALUES(%s)', [db_server_id])
+            db.execute('INSERT INTO "default".servers_chats(server_id) VALUES (%s)', [db_server_id])
             for user_id in members_ids:
                 if user_id == self.bot.user.id:
                     continue
@@ -140,7 +146,6 @@ class OnEventsChecker(commands.Cog):
                 db_user_id = db.fetchone()[0]
                 db.execute('INSERT INTO "default".connect(server_id, user_id) VALUES(%s, %s)', [db_server_id, db_user_id])
                 db.execute('INSERT INTO "default".users_levels(server_id, user_id, level, xp) VALUES (%s, %s, %s, %s)', [db_server_id, db_user_id, 0, 0])
-                db.execute('INSERT INTO "default".servers_chats(server_id) VALUES (%s)', [db_server_id])
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
@@ -150,11 +155,12 @@ class OnEventsChecker(commands.Cog):
         with Database() as db:
             db.execute('SELECT id FROM "default".servers WHERE discord_server_id = %s', [server_id])
             db_server_id = db.fetchone()[0]
+            db.execute('DELETE FROM "default".servers_levels WHERE server_id = %s', [db_server_id])
+            db.execute('DELETE FROM "default".servers_chats WHERE server_id = %s', [db_server_id])
+            db.execute('DELETE FROM "default".servers_languages_and_vibes WHERE server_id = %s', [db_server_id])
             for user_id in members_ids:
                 db.execute('SELECT id FROM "default".users WHERE discord_user_id = %s', [user_id])
                 db_user_id = db.fetchone()[0]
                 db.execute('DELETE FROM "default".connect WHERE server_id = %s and user_id = %s', [db_server_id, db_user_id])
                 db.execute('DELETE FROM "default".users_levels WHERE server_id = %s and user_id = %s', [db_server_id, db_user_id])
-                db.execute('DELETE FROM "default".servers_levels WHERE server_id = %s', [db_server_id])
-                db.execute('DELETE FROM "default".servers_chats WHERE server_id = %s', [db_server_id])
             db.execute('DELETE FROM "default".servers WHERE id = %s', [db_server_id])
