@@ -1,0 +1,8 @@
+discord~=1.7.3
+requests~=2.25.1
+wavelink~=0.9.9
+wikipedia~=1.4.0
+pafy~=0.5.5
+psycopg2~=2.9.1
+Flask~=2.0.1
+deep-translator~=1.4.4

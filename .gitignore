@@ -1,5 +1,3 @@
-/main/database/samurai.db
-/main/cogs/__init__.py
 /main/cogs/config.py
 /main/cogs/test_cog.py
 /main/test.py

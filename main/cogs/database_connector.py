@@ -1,5 +1,5 @@
 import psycopg2
-from cogs.config import *
+from main.cogs.config import *
 
 
 class Database:

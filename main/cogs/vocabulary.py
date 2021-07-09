@@ -1,6 +1,5 @@
 from types import SimpleNamespace
-
-from cogs.commands import commands_names
+from main.cogs.commands import commands_names
 
 
 class Names(SimpleNamespace):
@@ -430,7 +429,7 @@ ru = {
             }
         },
         "music_player":     {
-            "help": {
+            "help":  {
                 "title":       "Помощь по музыкальному модулю",
                 "description": ":track_previous: :stop_button: :play_pause:",
                 "name":        "Команды",
@@ -445,6 +444,26 @@ ru = {
 **.{commands_names.music_player.pause}** - поставлю на паузу воспроизведение
 **.{commands_names.music_player.resume}** - начну воспроизведение
 **.{commands_names.music_player.stop}** - уберу трек из очереди и остановлю проигрывание"""
+            },
+            "join":  {
+                "no_channel": [
+                    "Солнышко, ты должен быть в голосовом канале", "Зайка, я не знаю куда мне зайти, ты должен находиться в голосовом канале", "Ласточка, в какой голосовой канал заходить?"
+                ],
+                "success":    [
+                    "Захожу вы канал {}", "Уже лечу в {} к своим зайкам", "Лечу в {}"
+                ]  # {} - ctx.message.author.voice.channel.mention
+            },
+            "leave": {
+                "success":    [
+                    "До новых встреч", "Я буду по вам скучать", "Отлично посидели"
+                ]
+            },
+            "play": {
+                "no_args": [
+                    "Солнышко, укажи url или ключевые слова", "Солнышко, я не знаю, что ты хочешь найти", "Ты не указал, что искать, поэтому я не смогу воспроизвести музыку"
+                ],
+                "now_playing_title": "Сейчас играет :musical_note:",
+                "added_title": "Добавил композицию в очередь"
             }
         },
         "translator":       {

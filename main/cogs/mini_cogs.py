@@ -1,12 +1,13 @@
+import discord
+from discord.ext import commands
 import json
 from random import choice
-
 import requests
 from deep_translator import GoogleTranslator
-
-from cogs.commands import commands_names as cs
-from cogs.config import *
-from cogs.glossary import *
+from main.cogs.config import colour
+from main.cogs.commands import commands_names as cs
+from main.cogs.config import *
+from main.cogs.glossary import speech_setting
 
 commands_names = cs.mini_cogs
 
@@ -20,7 +21,7 @@ class MiniCogs(commands.Cog):
         vocabulary = speech_setting(ctx.guild.id).mini_cogs
         embed = discord.Embed(
             title=vocabulary.help.title,
-            colour=discord.Colour.purple()
+            colour=colour
         )
         embed.add_field(
             name=vocabulary.help.name,
@@ -40,7 +41,7 @@ class MiniCogs(commands.Cog):
         message = " ".join(message)
         embed = discord.Embed(
             title=vocabulary.magic_ball.title_start + choice(vocabulary.magic_ball.title_end),
-            colour=discord.Colour.purple()
+            colour=colour
         )
         embed.set_footer(text=vocabulary.magic_ball.footer.format(message))
         await ctx.send(embed=embed)
@@ -62,7 +63,7 @@ class MiniCogs(commands.Cog):
         embed = discord.Embed(
             title=vocabulary.get_forecast.title.format(place),
             description=vocabulary.get_forecast.description.format(place, response['main']['temp'], response['weather'][0]['description']),
-            colour=discord.Colour.purple()
+            colour=colour
         )
         embed.set_thumbnail(url=f"http://openweathermap.org/img/wn/{response['weather'][0]['icon']}.png")
         await ctx.send(embed=embed)
@@ -77,7 +78,7 @@ class MiniCogs(commands.Cog):
         embed = discord.Embed(
             title=vocabulary.get_quote.title,
             description=translated_message,
-            colour=discord.Colour.purple()
+            colour=colour
         )
         if vocabulary.get_quote.target != "en":
             embed.set_footer(text=vocabulary.get_quote.footer.format(quote))

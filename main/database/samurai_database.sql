@@ -59,11 +59,12 @@ create table "default".servers_chats
     server_id          bigint not null
         constraint servers_chats_servers_id_fk
             references "default".servers,
-    click_to_role_chat bigint,
-    welcome_chat       bigint,
-    info_chat          bigint,
-    bot_github_chat    bigint,
-    join_leave_chat    bigint
+    click_to_role_chat bigint default 0,
+    welcome_chat       bigint default 0,
+    info_chat          bigint default 0,
+    bot_github_chat    bigint default 0,
+    join_leave_chat    bigint default 0,
+    birthdays_chat     bigint default 0
 );
 
 create table "default".detect_language_game
@@ -159,4 +160,12 @@ create table "default".tic_tac_toe_game_statistic
     count     integer   not null
 );
 
+create table "default".servers_languages_and_vibes
+(
+    server_id bigint                    not null
+        constraint servers_languages_and_vibes_servers_id_fk
+            references "default".servers,
+    language  text default 'ru'::text   not null,
+    vibe      text default 'cute'::text not null
+);
 

@@ -1,10 +1,9 @@
 from random import choice
-
 import discord
 from discord.ext import commands
 from discord.utils import get
-
-from cogs.database_connector import Database
+from main.cogs.database_connector import Database
+from main.cogs.config import colour
 
 
 class OnEventsChecker(commands.Cog):
@@ -59,7 +58,7 @@ class OnEventsChecker(commands.Cog):
                         embed = discord.Embed(
                             title=":chart_with_upwards_trend: LEVEL UP :chart_with_upwards_trend:",
                             description=f"{after.mention} был повышен модератором {event.user.mention} до уровня {role.mention}. Мои поздравления!\n**level - {role.mention}\nxp - {db_xp}**",
-                            colour=discord.Colour.purple()
+                            colour=colour
                         )
                         embed.set_thumbnail(url=after.avatar_url)
                         await after.remove_roles(*levels_to_remove)
@@ -74,7 +73,7 @@ class OnEventsChecker(commands.Cog):
                         embed = discord.Embed(
                             title=":chart_with_downwards_trend: LEVEL DOWN :chart_with_downwards_trend:",
                             description=f"{after.mention} был понижен модератором {event.user.mention}.\n**level - 0\nxp - 0**",
-                            colour=discord.Colour.purple()
+                            colour=colour
                         )
                         embed.set_thumbnail(url=after.avatar_url)
                         return await info_chat.send(embed=embed)
@@ -136,6 +135,7 @@ class OnEventsChecker(commands.Cog):
             db_server_id = db.fetchone()[0]
             db.execute('INSERT INTO "default".servers_languages_and_vibes(server_id) VALUES(%s)', [db_server_id])
             db.execute('INSERT INTO "default".servers_chats(server_id) VALUES (%s)', [db_server_id])
+            db.execute('INSERT INTO "default".servers_music(server_id) VALUES(%S)', [db_server_id])
             for user_id in members_ids:
                 if user_id == self.bot.user.id:
                     continue
@@ -158,6 +158,10 @@ class OnEventsChecker(commands.Cog):
             db.execute('DELETE FROM "default".servers_levels WHERE server_id = %s', [db_server_id])
             db.execute('DELETE FROM "default".servers_chats WHERE server_id = %s', [db_server_id])
             db.execute('DELETE FROM "default".servers_languages_and_vibes WHERE server_id = %s', [db_server_id])
+            db.execute('DELETE FROM "default".music_queues WHERE queue_id = ('
+                       '    SELECT queue_id FROM "default".servers_music'
+                       '    WHERE server_id = %s)', [db_server_id])
+            db.execute('DELETE FROM "default".servers_music WHERE server_id = %s', [db_server_id])
             for user_id in members_ids:
                 db.execute('SELECT id FROM "default".users WHERE discord_user_id = %s', [user_id])
                 db_user_id = db.fetchone()[0]

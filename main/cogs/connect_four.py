@@ -1,9 +1,9 @@
 import discord
 from discord.ext import commands
-from cogs.config import *
-from cogs.commands import commands_names
 from random import choice
-
+from main.cogs.config import *
+from main.cogs.commands import commands_names
+from main.cogs.config import colour
 
 """
 ------------------------------------------------------------------------------------THIS CODE WILL BE REWRITTEN SOON------------------------------------------------------------------------------------
@@ -34,7 +34,7 @@ class ConnectFour(commands.Cog):
         embed = discord.Embed(
             title="Информация о **4 в ряд**",
             description=f'{self.icons["ball_1"]} {self.icons["ball_2"]}',
-            colour=discord.Colour.purple()
+            colour=colour
         )
         embed.add_field(name="Команды",
                         value=f"""Аналогичный модуль крестикам-ноликам, катай с друзьями или со мной
@@ -51,7 +51,7 @@ class ConnectFour(commands.Cog):
         embed = discord.Embed(
             title="Информация о **4 в ряд**",
             description=f'{self.icons["ball_1"]} {self.icons["ball_2"]}',
-            colour=discord.Colour.purple()
+            colour=colour
         )
         embed.add_field(name="Правила",
                         value="Цель игры — расположить раньше противника подряд по горизонтали, вертикали или диагонали четыре фишки своего цвета. Существуют варианты игры с полем разного размера, "
@@ -157,14 +157,14 @@ class ConnectFour(commands.Cog):
         if self.game_over:
             embed = discord.Embed(
                 title=f"Победа {self.turn.mention} {self.icons[mark]}:exclamation:",
-                colour=discord.Colour.purple()
+                colour=colour
             )
             await ctx.send(embed=embed)
         if self.count >= 9:
             self.game_over = True
             embed = discord.Embed(
                 title="Ничья:exclamation:",
-                colour=discord.Colour.purple()
+                colour=colour
             )
             await ctx.send(embed=embed)
         self.turn = self.player1 if self.turn == self.player2 else self.player2
@@ -178,7 +178,7 @@ class ConnectFour(commands.Cog):
         self.game_over = True
         embed = discord.Embed(
             title=f"{self.turn.mention} сдался:exclamation:",
-            colour=discord.Colour.purple()
+            colour=colour
         )
         await ctx.send(embed=embed)
 

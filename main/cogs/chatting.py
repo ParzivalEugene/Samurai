@@ -1,11 +1,10 @@
 import re
-
 import discord
 import requests
 from discord.ext import commands
-
-from cogs.commands import commands_names as cs
-from cogs.glossary import speech_setting, vb, current_language
+from main.cogs.config import colour
+from main.cogs.commands import commands_names as cs
+from main.cogs.glossary import speech_setting, vb, current_language
 
 commands_names = cs.chatting
 
@@ -25,7 +24,7 @@ class Chatting(commands.Cog):
         embed = discord.Embed(
             title=vocabulary.embed_cat.title,
             description=vocabulary.embed_cat.description.format(author.mention),
-            colour=discord.Colour.purple()
+            colour=colour
         )
         embed.set_image(url=data["file"])
         return embed
@@ -38,7 +37,7 @@ class Chatting(commands.Cog):
         embed = discord.Embed(
             title=vocabulary.embed_meme.title,
             description=vocabulary.embed_meme.description.format(author.mention),
-            colour=discord.Colour.purple()
+            colour=colour
         )
         embed.set_image(url=url)
         return embed
@@ -56,7 +55,7 @@ class Chatting(commands.Cog):
         embed = discord.Embed(
             title=vocabulary.embed_dog.title,
             description=vocabulary.embed_dog.description.format(author.mention),
-            colour=discord.Colour.purple()
+            colour=colour
         )
         embed.set_image(url=data)
         return embed
@@ -67,7 +66,7 @@ class Chatting(commands.Cog):
         embed = discord.Embed(
             title=vocabulary.help.title,
             description=vocabulary.help.description,
-            colour=discord.Colour.purple()
+            colour=colour
         )
         embed.set_footer(text=vocabulary.help.footer)
         embed.set_thumbnail(url=self.bot.user.avatar_url)
@@ -176,7 +175,7 @@ class Chatting(commands.Cog):
 {self.get_emoji("nigger")} - **GTA V**
 
 {self.get_emoji("gomer")} - **Among Us**""",
-            colour=discord.Colour.purple()
+            colour=colour
         )
         message = await ctx.send(embed=embed)
         await message.add_reaction(self.get_emoji("peepohappy"))
@@ -196,7 +195,7 @@ class Chatting(commands.Cog):
             description=f"**Wassup samurai!** Приветствуем тебя на великолепном сервере {self.get_emoji('bulka')}\nЗдесь ты найдешь все что необходимо: **друзей, общение и голые сиськи** "
                         f"{self.get_emoji('giggle')}\n\nПо всем интересующим тебя вопросам ты можешь обращаться к {discord.utils.get(ctx.guild.roles, name='SHOGUNS').mention} или к пожилому "
                         f"{self.bot.get_user(414105456907386886).mention}\n\nОбщая информация сервера:",
-            colour=discord.Colour.purple()
+            colour=colour
         )
         embed.add_field(
             name="Уведомления стримов",

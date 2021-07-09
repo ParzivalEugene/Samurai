@@ -1,11 +1,10 @@
 from random import choice
-
 import discord
 from discord.ext import commands
-
-from cogs.commands import commands_names as cs
-from cogs.database_connector import Database
-from cogs.vocabulary import vocabulary as vb
+from main.cogs.commands import commands_names as cs
+from main.cogs.database_connector import Database
+from main.cogs.vocabulary import vocabulary as vb
+from main.cogs.config import colour
 
 commands_names = cs.glossary
 
@@ -41,7 +40,7 @@ class Glossary(commands.Cog):
         embed = discord.Embed(
             title=vocabulary.help.title,
             description=vocabulary.help.description,
-            colour=discord.Colour.purple()
+            colour=colour
         )
         embed.add_field(
             name=vocabulary.help.name,
@@ -71,7 +70,7 @@ class Glossary(commands.Cog):
             embed = discord.Embed(
                 title=vocabulary.view_status.title.format(ctx.guild.name),
                 description=vocabulary.view_status.description.format(language, language, vibe),
-                colour=discord.Colour.purple()
+                colour=colour
             )
             embed.set_thumbnail(url=ctx.guild.icon_url)
             await ctx.send(embed=embed)

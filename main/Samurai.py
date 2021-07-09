@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands
-
 from cogs.birthdays import Birthdays
 # from cogs.tic_tac_toe_game import TicTacToeGame
 # from cogs.connect_four import ConnectFour
@@ -11,7 +10,7 @@ from cogs.glossary import Glossary
 from cogs.level_system import LevelSystem
 from cogs.mini_cogs import MiniCogs
 from cogs.on_events_checker import OnEventsChecker
-# from cogs.music_player import Player
+from cogs.music_player import Music
 from cogs.translator import DeepTranslator
 from cogs.wiki_pedia import Wikipedia
 from keep_alive import keep_alive
@@ -34,7 +33,7 @@ bot.add_cog(MiniCogs(bot))
 bot.add_cog(Chatting(bot))
 # bot.add_cog(ConnectFour(bot))
 # bot.add_cog(TicTacToeGame(bot))
-# bot.add_cog(Player(bot))
+bot.add_cog(Music(bot))
 bot.add_cog(DeepTranslator(bot))
 bot.add_cog(ClickToRoles(bot))
 bot.add_cog(Wikipedia(bot))

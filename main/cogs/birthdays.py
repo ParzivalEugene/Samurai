@@ -1,13 +1,12 @@
 import datetime
 from random import choice
-
 import discord
 from discord.ext import commands, tasks
 from discord.utils import get
-
-from cogs.commands import commands_names as cs
-from cogs.database_connector import Database
-from cogs.glossary import speech_setting
+from main.cogs.config import colour
+from main.cogs.commands import commands_names as cs
+from main.cogs.database_connector import Database
+from main.cogs.glossary import speech_setting
 
 commands_names = cs.birthdays
 
@@ -22,7 +21,7 @@ class Birthdays(commands.Cog):
         embed = discord.Embed(
             title=vocabulary.help.title,
             description=vocabulary.help.description,
-            colour=discord.Colour.purple()
+            colour=colour
         )
         embed.add_field(
             name=vocabulary.help.name,
@@ -57,7 +56,7 @@ class Birthdays(commands.Cog):
                 embed = discord.Embed(
                     title=vocabulary.check_birthdays.title.format(user.name),
                     description=vocabulary.check_birthdays.description.format(user.mention, ':heart:', self.bot.user.mention),
-                    colour=discord.Colour.purple()
+                    colour=colour
                 )
                 embed.set_thumbnail(url=user.avatar_url)
                 await chat.send(embed=embed)
@@ -148,7 +147,7 @@ class Birthdays(commands.Cog):
             embed = discord.Embed(
                 title=vocabulary.show_birthday.title.format(user.name),
                 description=choice(vocabulary.show_birthday.description_start).format(user.mention) + vocabulary.show_birthday.description_end.format(db_date),
-                colour=discord.Colour.purple()
+                colour=colour
             )
             embed.set_thumbnail(url=user.avatar_url)
             await ctx.send(embed=embed)
@@ -173,7 +172,7 @@ class Birthdays(commands.Cog):
         embed = discord.Embed(
             title=vocabulary.show_birthdays.title.format(server.name),
             description="\n".join([f"{pos + 1}. {get(server.members, id=value[0]).mention} - **{str(value[1]).replace('-', '.')}**" for pos, value in enumerate(output_embed)]),
-            colour=discord.Colour.purple()
+            colour=colour
         )
         embed.set_thumbnail(url=server.icon_url)
         await ctx.send(embed=embed)

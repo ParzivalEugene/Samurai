@@ -1,12 +1,11 @@
 from random import choice
-
 import discord
 from discord.ext import commands
 from discord.utils import get
-
-from cogs.commands import commands_names as cs
-from cogs.database_connector import Database
-from cogs.glossary import speech_setting
+from main.cogs.config import colour
+from main.cogs.commands import commands_names as cs
+from main.cogs.database_connector import Database
+from main.cogs.glossary import speech_setting
 
 commands_names = cs.level
 
@@ -21,7 +20,7 @@ class LevelSystem(commands.Cog):
         embed = discord.Embed(
             title=vocabulary.help.title,
             description=vocabulary.help.description,
-            colour=discord.Colour.purple()
+            colour=colour
         )
         embed.add_field(name=vocabulary.help.name,
                         value=vocabulary.help.value,
@@ -56,7 +55,7 @@ class LevelSystem(commands.Cog):
                     embed = discord.Embed(
                         title=vocabulary.check_level_up.title,
                         description=choice(vocabulary.check_level_up.description_start).format(mention) + vocabulary.check_level_up.description_end.format(role.mention, user_xp),
-                        colour=discord.Colour.purple()
+                        colour=colour
                     )
                     embed.set_thumbnail(url=user.avatar_url)
                     info_chat = db.execute('SELECT info_chat FROM "default".servers_chats WHERE server_id = %s', [db_server_id]).fetchone()[0]
@@ -155,7 +154,7 @@ class LevelSystem(commands.Cog):
             embed = discord.Embed(
                 title=choice(vocabulary.level_show.title),
                 description=data,
-                colour=discord.Colour.purple()
+                colour=colour
             )
             embed.set_thumbnail(url=server.icon_url)
             embed.set_footer(text=vocabulary.level_show.footer)
@@ -179,7 +178,7 @@ class LevelSystem(commands.Cog):
             embed = discord.Embed(
                 title=vocabulary.level.title.format(user.name),
                 description=choice(vocabulary.level.description_start) + vocabulary.level.description_end.format(user.mention, db_user_level, db_user_xp),
-                colour=discord.Colour.purple()
+                colour=colour
             )
             embed.set_thumbnail(url=user.avatar_url)
             await ctx.send(embed=embed)
@@ -196,7 +195,7 @@ class LevelSystem(commands.Cog):
                 return await ctx.send(choice(vocabulary.level_dashboard.no_info))
             embed = discord.Embed(
                 title=vocabulary.level_dashboard.title,
-                colour=discord.Colour.purple()
+                colour=colour
             )
             embed.set_thumbnail(url=server.icon_url)
             db.execute('SELECT user_id, level, xp FROM "default".users_levels WHERE server_id = %s ORDER BY xp DESC LIMIT %s', [db_server_id, limit])

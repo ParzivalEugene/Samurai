@@ -1,11 +1,10 @@
 from random import choice
-
 import discord
 import wikipedia
 from discord.ext import commands
-
-from cogs.commands import commands_names as cs
-from cogs.glossary import speech_setting
+from main.cogs.commands import commands_names as cs
+from main.cogs.glossary import speech_setting, current_language
+from main.cogs.config import colour
 
 commands_names = cs.wikipedia
 
@@ -25,7 +24,7 @@ class Wikipedia(commands.Cog):
                 site = "https://samuraibot.brizy.site/"
                 embed = discord.Embed(
                     description=choice(vocabulary.wikipedia_search.description_about_me).format(site),
-                    colour=discord.Colour.purple()
+                    colour=colour
                 )
                 return await ctx.send(embed=embed)
             await ctx.send(wikipedia.summary(message))

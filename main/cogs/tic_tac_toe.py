@@ -1,8 +1,8 @@
 import discord
 from discord.ext import commands
 from random import choice
-from cogs.commands import commands_names
-from cogs.config import *
+from main.cogs.commands import commands_names
+from main.cogs.config import *
 
 
 """
@@ -43,7 +43,7 @@ class TicTacToe(commands.Cog):
         embed = discord.Embed(
             title="Информация о модуле **крестики-нолики**",
             description=":negative_squared_cross_mark: :o2:",
-            colour=discord.Colour.purple()
+            colour=colour
         )
         embed.add_field(name="Команды",
                         value=f"""Модуль с крестиками-ноликами для игр с друзьями или мной
@@ -63,7 +63,7 @@ class TicTacToe(commands.Cog):
         embed = discord.Embed(
             title="Информация о **крестиках-ноликах**",
             description=":negative_squared_cross_mark: :o2:",
-            colour=discord.Colour.purple()
+            colour=colour
         )
         embed.add_field(name="Правила",
                         value="Игроки по очереди ставят на свободные клетки поля 3х3 знаки (один всегда крестики, другой всегда нолики). Первый, выстроивший в ряд 3 своих фигуры по вертикали, "
@@ -203,7 +203,7 @@ class TicTacToe(commands.Cog):
         self.game_over = True
         embed = discord.Embed(
             title=f"{self.turn.name} сдался:exclamation:",
-            colour=discord.Colour.purple()
+            colour=colour
         )
         await ctx.send(embed=embed)
 
@@ -211,7 +211,7 @@ class TicTacToe(commands.Cog):
         if self.game_over:
             embed = discord.Embed(
                 title=f"Победа {self.turn.name} {self.icons[self.mark]}:exclamation:",
-                colour=discord.Colour.purple()
+                colour=colour
             )
             await ctx.send(embed=embed)
             return
@@ -219,7 +219,7 @@ class TicTacToe(commands.Cog):
             self.game_over = True
             embed = discord.Embed(
                 title="Ничья:exclamation:",
-                colour=discord.Colour.purple()
+                colour=colour
             )
             await ctx.send(embed=embed)
         return

@@ -5,11 +5,11 @@ import discord
 import requests
 from deep_translator import GoogleTranslator, single_detection
 from discord.ext import commands
-
-from cogs.commands import commands_names as cs
-from cogs.config import *
-from cogs.database_connector import Database
-from cogs.glossary import speech_setting
+from main.cogs.config import colour
+from main.cogs.commands import commands_names as cs
+from main.cogs.config import *
+from main.cogs.database_connector import Database
+from main.cogs.glossary import speech_setting
 
 commands_names = cs.translator
 
@@ -130,7 +130,7 @@ class DeepTranslator(commands.Cog):
         embed = discord.Embed(
             title=vocabulary.help.title,
             description=vocabulary.help.description,
-            colour=discord.Colour.purple()
+            colour=colour
         )
         embed.add_field(
             name=vocabulary.help.name,
@@ -166,7 +166,7 @@ class DeepTranslator(commands.Cog):
         embed = discord.Embed(
             title=vocabulary.translate.title,
             description=translated_message,
-            colour=discord.Colour.purple()
+            colour=colour
         )
         embed.set_footer(text=vocabulary.translate.footer.format(message))
         async with ctx.typing():
@@ -179,7 +179,7 @@ class DeepTranslator(commands.Cog):
         embed = discord.Embed(
             title=vocabulary.translate.detect_language.title,
             description=self.google_translator_keys[language],
-            colour=discord.Colour.purple()
+            colour=colour
         )
         async with ctx.typing():
             await ctx.send(embed=embed)
@@ -190,7 +190,7 @@ class DeepTranslator(commands.Cog):
         embed = discord.Embed(
             title=vocabulary.language_list.title,
             description="\n".join([f"{i} - {j}" for i, j in self.google_translator_keys.items()]),
-            colour=discord.Colour.purple()
+            colour=colour
         )
         await ctx.send(embed=embed)
 
@@ -216,7 +216,7 @@ class DeepTranslator(commands.Cog):
             embed = discord.Embed(
                 title=vocabulary.what_the_language_game.title,
                 description=GoogleTranslator(source="en", target=language).translate(quote),
-                colour=discord.Colour.purple()
+                colour=colour
             )
             await ctx.send(embed=embed)
             while counter:
