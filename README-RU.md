@@ -1,6 +1,6 @@
 # Samurai Discord Bot  
   
-![Discord Bot](https://github.com/ParzivalEugene/Samurai/blob/master/main/database/samurai_database.pngmain/images/chat_bot.svg)
+![Discord Bot](https://github.com/ParzivalEugene/Samurai/blob/master/main/images/chat_bot.svg)
 
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/ParzivalEugene/Samurai) ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/ParzivalEugene/Samurai)  
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/w/ParzivalEugene/Samurai) ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/ParzivalEugene/Samurai/master)  
@@ -165,4 +165,4 @@
   
 ## Лицензия  
  
-[![GitHub](https://img.shields.io/github/license/ParzivalEugene/Samurai)](LISENSE.md)  
+[![GitHub](https://img.shields.io/github/license/ParzivalEugene/Samurai)](https://github.com/ParzivalEugene/Samurai/blob/master/LICENSE.md)
