@@ -1,4 +1,7 @@
 /main/cogs/config.py
 /main/cogs/test_cog.py
+/main/cogs/ffmpeg
 /main/test.py
 /main/keep_alive.py
+/jdk-13.0.2
+/venv
