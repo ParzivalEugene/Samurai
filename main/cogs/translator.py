@@ -1,13 +1,11 @@
 import json
 from random import choice
-
 import discord
 import requests
 from deep_translator import GoogleTranslator, single_detection
 from discord.ext import commands
-from main.cogs.config import colour
+from main.cogs.config import colour, api_key_for_single_detection
 from main.cogs.commands import commands_names as cs
-from main.cogs.config import *
 from main.cogs.database_connector import Database
 from main.cogs.glossary import speech_setting
 

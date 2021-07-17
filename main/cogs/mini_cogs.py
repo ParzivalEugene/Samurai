@@ -4,9 +4,8 @@ import json
 from random import choice
 import requests
 from deep_translator import GoogleTranslator
-from main.cogs.config import colour
+from main.cogs.config import colour, app_id_for_forecast
 from main.cogs.commands import commands_names as cs
-from main.cogs.config import *
 from main.cogs.glossary import speech_setting
 
 commands_names = cs.mini_cogs
@@ -49,13 +48,14 @@ class MiniCogs(commands.Cog):
     @commands.command(name=commands_names.get_forecast)
     async def get_forecast(self, ctx, *, place: str):
         vocabulary = speech_setting(ctx.guild.id).mini_cogs
-        response = requests.get("http://api.openweathermap.org/data/2.5/find",
-                                params={
-                                    "q":     place,
-                                    "lang":  vocabulary.get_forecast.lang,
-                                    "units": "metric",
-                                    "APPID": app_id_for_forecast
-                                }).json()
+        response = requests.get(
+            "http://api.openweathermap.org/data/2.5/find",
+            params={
+                "q":     place,
+                "lang":  vocabulary.get_forecast.lang,
+                "units": "metric",
+                "APPID": app_id_for_forecast
+            }).json()
         if response["cod"] != "200":
             await ctx.send(choice(vocabulary.get_forecast.error))
             return

@@ -5,7 +5,7 @@ from cogs.birthdays import Birthdays
 # from cogs.connect_four import ConnectFour
 from cogs.chatting import Chatting
 from cogs.click_to_roles import ClickToRoles
-from cogs.config import *
+from cogs.config import prefix, token_for_bot
 from cogs.glossary import Glossary
 from cogs.level_system import LevelSystem
 from cogs.mini_cogs import MiniCogs

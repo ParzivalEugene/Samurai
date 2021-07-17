@@ -69,7 +69,7 @@ class Glossary(commands.Cog):
             ).fetchone()
             embed = discord.Embed(
                 title=vocabulary.view_status.title.format(ctx.guild.name),
-                description=vocabulary.view_status.description.format(language, language, vibe),
+                description=vocabulary.view_status.description.format(language, vibe),
                 colour=colour
             )
             embed.set_thumbnail(url=ctx.guild.icon_url)
