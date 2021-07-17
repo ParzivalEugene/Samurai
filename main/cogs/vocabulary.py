@@ -433,17 +433,7 @@ ru = {
                 "title":       "Помощь по музыкальному модулю",
                 "description": ":track_previous: :stop_button: :play_pause:",
                 "name":        "Команды",
-                "value":       f"""Этот модуль был создан, чтобы ты мог отдыхать со своими друзьями в голосовом канале и параллельно слушать любимую музыку
-**.{commands_names.music_player.help}** - отдельный эмбед для вывода помощи по плэеру
-**.{commands_names.music_player.join}** - зайду в голосовой канала, в котором находится автор сообщения.
-**.{commands_names.music_player.leave}** - уйду из голосового канала
-**.{commands_names.music_player.queue}** - выведу очередь треков
-**.{commands_names.music_player.queue} <url>** - добавлю в очередь трек
-**.{commands_names.music_player.remove} <number>** - удалю трек под номером <number>
-**.{commands_names.music_player.play}** - начну играть музыку из очереди
-**.{commands_names.music_player.pause}** - поставлю на паузу воспроизведение
-**.{commands_names.music_player.resume}** - начну воспроизведение
-**.{commands_names.music_player.stop}** - уберу трек из очереди и остановлю проигрывание"""
+                "value":       f"""в разработке"""
             },
             "join":               {
                 "no_channel":         [

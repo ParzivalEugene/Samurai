@@ -135,7 +135,7 @@ class OnEventsChecker(commands.Cog):
             db_server_id = db.fetchone()[0]
             db.execute('INSERT INTO "default".servers_languages_and_vibes(server_id) VALUES(%s)', [db_server_id])
             db.execute('INSERT INTO "default".servers_chats(server_id) VALUES (%s)', [db_server_id])
-            db.execute('INSERT INTO "default".servers_music(server_id) VALUES(%S)', [db_server_id])
+            db.execute('INSERT INTO "default".servers_music(server_id) VALUES(%s)', [db_server_id])
             for user_id in members_ids:
                 if user_id == self.bot.user.id:
                     continue

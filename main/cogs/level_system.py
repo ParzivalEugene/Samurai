@@ -38,10 +38,10 @@ class LevelSystem(commands.Cog):
         server_id = server.id
         with Database() as db:
             db_server_id = db.execute('SELECT id FROM "default".servers WHERE discord_server_id = %s', [server_id]).fetchone()[0]
-            db_user_id = db.execute('SELECT id FROM "default".users WHERE discord_user_id = %s', [user_id]).fetchone()[0]
             levels = db.execute('SELECT level_id, level_xp FROM "default".servers_levels WHERE server_id = %s ORDER BY level_xp DESC ', [db_server_id]).fetchall()
             if not levels:
                 return
+            db_user_id = db.execute('SELECT id FROM "default".users WHERE discord_user_id = %s', [user_id]).fetchone()[0]
             user_xp = db.execute('SELECT xp FROM "default".users_levels WHERE user_id = %s and server_id = %s', [db_user_id, db_server_id]).fetchone()[0]
             user_xp += 1
             db.execute('UPDATE "default".users_levels SET xp = %s WHERE user_id = %s and server_id = %s', [user_xp, db_user_id, db_server_id])
