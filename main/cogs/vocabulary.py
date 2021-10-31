@@ -1,5 +1,5 @@
 from types import SimpleNamespace
-from main.cogs.commands import commands_names
+from cogs.commands import commands_names
 
 
 class Names(SimpleNamespace):
@@ -221,6 +221,11 @@ ru = {
                     "Мои хорошие, вы сможете увидеть мои поздравления в {}",  # {} - info_chat
                     "Ждите своих дней рождений и получайте самые лучшие слова от меня в {}"  # {} - info_chat
                 ]
+            }
+        },
+        "connect_four":     {
+            "help": {
+
             }
         },
         "level_system":     {
@@ -756,14 +761,12 @@ en = {
             }
         }
     },
-    "gentleman": {
-
-    },
-    "rude":      {
-
-    }
+    "gentleman": {},
+    "rude":      {}
 }
 
 vocabulary = {}
 vocabulary.update({"ru": Names(ru)})
 vocabulary.update({"en": Names(en)})
+
+a = "Андрей {}"

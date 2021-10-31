@@ -1,10 +1,8 @@
 from random import choice
-
 import discord
 from discord.ext import commands
-
-from main.cogs.commands import commands_names as cs
-from main.cogs.config import *
+from cogs.commands import commands_names as cs
+from cogs.config import *
 
 commands_names = cs.tic_tac_toe
 

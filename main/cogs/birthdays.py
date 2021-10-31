@@ -3,10 +3,10 @@ from random import choice
 import discord
 from discord.ext import commands, tasks
 from discord.utils import get
-from main.cogs.config import colour
-from main.cogs.commands import commands_names as cs
-from main.cogs.database_connector import Database
-from main.cogs.glossary import speech_setting
+from cogs.config import colour
+from cogs.commands import commands_names as cs
+from cogs.database_connector import Database
+from cogs.glossary import speech_setting
 
 commands_names = cs.birthdays
 

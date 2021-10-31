@@ -13,7 +13,8 @@ class Names(SimpleNamespace):
 
 commands_names_dict = {
     "chatting":     {
-        "help": "help"
+        "help": "help",
+
     },
     "birthdays":    {
         "help":      "bd_help",

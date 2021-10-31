@@ -1,8 +1,8 @@
 import discord
 from discord.ext import commands
 from cogs.birthdays import Birthdays
-# from cogs.tic_tac_toe_game import TicTacToeGame
-# from cogs.connect_four import ConnectFour
+from cogs.tic_tac_toe_game import TicTacToeGame
+from cogs.connect_four import ConnectFour
 from cogs.chatting import Chatting
 from cogs.click_to_roles import ClickToRoles
 from cogs.config import prefix, token_for_bot

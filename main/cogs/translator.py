@@ -4,10 +4,10 @@ import discord
 import requests
 from deep_translator import GoogleTranslator, single_detection
 from discord.ext import commands
-from main.cogs.config import colour, api_key_for_single_detection
-from main.cogs.commands import commands_names as cs
-from main.cogs.database_connector import Database
-from main.cogs.glossary import speech_setting
+from cogs.config import colour, api_key_for_single_detection
+from cogs.commands import commands_names as cs
+from cogs.database_connector import Database
+from cogs.glossary import speech_setting
 
 commands_names = cs.translator
 

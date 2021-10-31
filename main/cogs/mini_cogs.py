@@ -4,9 +4,9 @@ import json
 from random import choice
 import requests
 from deep_translator import GoogleTranslator
-from main.cogs.config import colour, app_id_for_forecast
-from main.cogs.commands import commands_names as cs
-from main.cogs.glossary import speech_setting
+from cogs.config import colour, app_id_for_forecast
+from cogs.commands import commands_names as cs
+from cogs.glossary import speech_setting
 
 commands_names = cs.mini_cogs
 

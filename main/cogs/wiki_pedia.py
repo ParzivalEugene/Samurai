@@ -2,9 +2,9 @@ from random import choice
 import discord
 import wikipedia
 from discord.ext import commands
-from main.cogs.commands import commands_names as cs
-from main.cogs.glossary import speech_setting, current_language
-from main.cogs.config import colour
+from cogs.commands import commands_names as cs
+from cogs.glossary import speech_setting, current_language
+from cogs.config import colour
 
 commands_names = cs.wikipedia
 

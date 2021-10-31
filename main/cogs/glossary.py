@@ -1,10 +1,10 @@
 from random import choice
 import discord
 from discord.ext import commands
-from main.cogs.commands import commands_names as cs
-from main.cogs.database_connector import Database
-from main.cogs.vocabulary import vocabulary as vb
-from main.cogs.config import colour
+from cogs.commands import commands_names as cs
+from cogs.database_connector import Database
+from cogs.vocabulary import vocabulary as vb
+from cogs.config import colour
 
 commands_names = cs.glossary
 

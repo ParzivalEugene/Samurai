@@ -8,9 +8,9 @@ import aiohttp
 import discord
 import wavelink
 from discord.ext import commands
-from main.cogs.config import colour
-from main.cogs.commands import commands_names as cs
-from main.cogs.glossary import speech_setting
+from config import colour
+from commands import commands_names as cs
+from glossary import speech_setting
 
 """
 don't forget to run `java -jar Lavalink.jar` in jdk/bin
